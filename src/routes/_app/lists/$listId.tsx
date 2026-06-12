@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Pencil, Plus, Trash2 } from "lucide-react"
+import { CheckCheck, CircleDashed, CircleCheckBig, Pencil, Plus, RefreshCw, RotateCcw, Trash2 } from "lucide-react"
 import * as React from "react"
 
 import * as cardsController from "@/controllers/cardsController"
@@ -39,7 +39,7 @@ function ListDetailPage() {
   } = useMtg()
 
   const list = React.useMemo(() => lists.find((l) => l.id === listId) ?? null, [listId, lists])
-  const cards = cardsByListId[listId] ?? []
+  const cards = React.useMemo(() => cardsByListId[listId] ?? [], [cardsByListId, listId])
 
   React.useEffect(() => {
     refreshCards(listId)
@@ -84,10 +84,16 @@ function ListDetailPage() {
             <Plus className="size-4" />
             Nova carta
           </Button>
-          <CopyToClipboardButton text={formatCardsForLigaMagic(cards)} label="Copiar lista" disabled={cards.length === 0} />
+          <CopyToClipboardButton
+            text={formatCardsForLigaMagic(cards)}
+            label="Copiar lista inteira"
+            showLabel
+            disabled={cards.length === 0}
+          />
           <CopyToClipboardButton
             text={formatCardsForLigaMagic(selectedCards)}
-            label="Copiar selecionadas"
+            label="Copiar cartas selecionadas"
+            showLabel
             disabled={selectedCards.length === 0}
           />
         </div>
@@ -125,6 +131,7 @@ function ListDetailPage() {
                 </SelectRoot>
               </div>
               <Button variant="outline" onClick={() => refreshCards(listId)} disabled={isLoadingCards(listId)}>
+                <RefreshCw className="size-4" />
                 Atualizar
               </Button>
             </div>
@@ -132,7 +139,7 @@ function ListDetailPage() {
 
           <CardContent className="p-0">
             <div className="w-full overflow-x-auto">
-              <Table>
+              <Table className="w-full table-auto">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[48px]">
@@ -149,10 +156,11 @@ function ListDetailPage() {
                         }}
                       />
                     </TableHead>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Edição</TableHead>
-                    <TableHead className="w-[90px] text-right">Qtd</TableHead>
-                    <TableHead className="w-[200px] text-right">Ações</TableHead>
+                    <TableHead className="w-full min-w-[320px]">Nome</TableHead>
+                    <TableHead className="w-[140px]">Edição</TableHead>
+                    <TableHead className="w-[120px]">Compra</TableHead>
+                    <TableHead className="w-[72px] text-right">Qtd</TableHead>
+                    <TableHead className="w-[220px] text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -169,11 +177,11 @@ function ListDetailPage() {
                           }
                         />
                       </TableCell>
-                      <TableCell className="font-medium">
+                      <TableCell className="w-full min-w-[320px] font-medium">
                         {c.url_image ? (
                           <HoverCardRoot openDelay={140}>
                             <HoverCardTrigger asChild>
-                              <button type="button" className="text-left hover:underline">
+                              <button type="button" className="inline-flex max-w-full text-left hover:underline">
                                 {c.name}
                               </button>
                             </HoverCardTrigger>
@@ -193,10 +201,27 @@ function ListDetailPage() {
                       <TableCell>
                         <Badge variant="muted">{c.edition}</Badge>
                       </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={c.is_purchased ? "secondary" : "muted"}
+                          className="gap-1.5"
+                        >
+                          {c.is_purchased ? <CircleCheckBig className="size-3.5" /> : <CircleDashed className="size-3.5" />}
+                          {c.is_purchased ? "Comprada" : "Pendente"}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-right tabular-nums">{c.quantity}</TableCell>
                       <TableCell>
                         <div className="flex items-center justify-end gap-2">
                           <CopyToClipboardButton text={formatCardForLigaMagic(c)} label="Copiar carta" />
+                          <Button
+                            size="sm"
+                            variant={c.is_purchased ? "secondary" : "outline"}
+                            onClick={() => updateCard(c.id, { is_purchased: !c.is_purchased })}
+                          >
+                            {c.is_purchased ? <RotateCcw className="size-4" /> : <CheckCheck className="size-4" />}
+                            {c.is_purchased ? "Marcar pendente" : "Marcar comprada"}
+                          </Button>
                           <Button
                             size="icon-sm"
                             variant="outline"
@@ -226,7 +251,7 @@ function ListDetailPage() {
 
                   {visibleCards.length === 0 && !isLoadingCards(listId) ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
+                      <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
                         Nenhuma carta encontrada para esse filtro.
                       </TableCell>
                     </TableRow>
@@ -249,6 +274,7 @@ function ListDetailPage() {
               name: values.name,
               edition: values.edition,
               quantity: values.quantity,
+              is_purchased: values.is_purchased,
               url_image: values.url_image,
             })
             return
@@ -259,6 +285,7 @@ function ListDetailPage() {
             name: values.name,
             edition: values.edition,
             quantity: values.quantity,
+            is_purchased: values.is_purchased,
             url_image: values.url_image,
           })
         }}

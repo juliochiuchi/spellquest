@@ -13,7 +13,7 @@ function ToastViewport({ className, ...props }: React.ComponentProps<typeof Toas
   return (
     <Toast.Viewport
       className={cn(
-        "fixed top-0 right-0 z-[100] flex max-h-screen w-full flex-col gap-2 p-4 sm:top-auto sm:right-0 sm:bottom-0 sm:max-w-sm",
+        "fixed top-0 right-0 z-100 flex max-h-screen w-full flex-col gap-2 p-4 sm:top-auto sm:right-0 sm:bottom-0 sm:max-w-sm",
         className
       )}
       {...props}
@@ -22,13 +22,13 @@ function ToastViewport({ className, ...props }: React.ComponentProps<typeof Toas
 }
 
 const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-start justify-between gap-3 overflow-hidden rounded-xl border bg-background p-4 pr-7 shadow-lg outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full sm:data-[state=open]:slide-in-from-bottom-full data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=cancel]:translate-x-0 data-[swipe=end]:animate-out data-[swipe=end]:slide-out-to-right-full",
+  "group pointer-events-auto relative flex w-full items-start justify-between gap-3 overflow-hidden rounded-xl border bg-card p-4 pr-7 shadow-xl outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full sm:data-[state=open]:slide-in-from-bottom-full data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=cancel]:translate-x-0 data-[swipe=end]:animate-out data-[swipe=end]:slide-out-to-right-full",
   {
     variants: {
       variant: {
         default: "border-border",
-        success: "border-emerald-500/30 bg-emerald-500/10",
-        destructive: "border-destructive/50 bg-destructive/10",
+        success: "border-emerald-500/50",
+        destructive: "border-destructive/70",
       },
     },
     defaultVariants: {

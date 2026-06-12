@@ -1,11 +1,12 @@
 import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { type Resolver, useForm } from "react-hook-form"
+import { type Resolver, useForm, useWatch } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogRoot, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import type { CardFormValues } from "@/types/forms"
 import { cardFormSchema } from "@/types/forms"
@@ -67,12 +68,14 @@ function CardFormDialogBody({
         name: initial.name,
         edition: initial.edition,
         quantity: initial.quantity,
+        is_purchased: initial.is_purchased,
         url_image: initial.url_image,
       }
       : {
         name: "",
         edition: editionSuggestions[0] ?? "",
         quantity: 1,
+        is_purchased: false,
         url_image: null,
       },
   })
@@ -82,6 +85,7 @@ function CardFormDialogBody({
   })
 
   const datalistId = React.useId()
+  const isPurchased = useWatch({ control: form.control, name: "is_purchased" }) ?? false
 
   return (
     <form className="mt-4 flex flex-col gap-4" onSubmit={submit}>
@@ -106,6 +110,18 @@ function CardFormDialogBody({
         <Label>Quantidade</Label>
         <Input type="number" min={1} step={1} inputMode="numeric" {...form.register("quantity")} />
         {form.formState.errors.quantity ? <p className="text-xs text-destructive">{form.formState.errors.quantity.message}</p> : null}
+      </div>
+
+      <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="is_purchased">Carta comprada</Label>
+          <p className="text-xs text-muted-foreground">Ative se essa carta ja foi comprada.</p>
+        </div>
+        <Switch
+          id="is_purchased"
+          checked={isPurchased}
+          onCheckedChange={(checked) => form.setValue("is_purchased", Boolean(checked), { shouldDirty: true })}
+        />
       </div>
 
       <div className="flex flex-col gap-2">

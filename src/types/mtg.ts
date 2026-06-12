@@ -18,5 +18,5 @@ export type Card = {
   edition: string
   quantity: number
   url_image: string | null
+  is_purchased: boolean
 }
-

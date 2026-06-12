@@ -33,7 +33,7 @@ function AppLayout() {
               </div>
               <div className="flex flex-col leading-tight">
                 <span className="text-sm font-semibold tracking-tight">SpellQuest</span>
-                <span className="text-xs text-muted-foreground">Listas de compra de Magic</span>
+                <span className="text-xs text-muted-foreground">Listas de compra de Magic: The Gathering</span>
               </div>
             </div>
 

@@ -21,6 +21,7 @@ export const cardFormSchema = z.object({
   name: z.string().trim().min(1),
   edition: z.string().trim().min(1),
   quantity: z.coerce.number().int().min(1),
+  is_purchased: z.boolean(),
   url_image: z
     .string()
     .trim()
@@ -29,4 +30,3 @@ export const cardFormSchema = z.object({
 })
 
 export type CardFormValues = z.infer<typeof cardFormSchema>
-
