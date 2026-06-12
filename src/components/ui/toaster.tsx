@@ -1,5 +1,3 @@
-import * as React from "react"
-
 import { ToastClose, ToastDescription, ToastProvider, ToastRoot, ToastTitle, ToastViewport } from "@/components/ui/toast"
 import { dismiss, useToast } from "@/components/ui/use-toast"
 
