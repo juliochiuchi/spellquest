@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router"
-import { ArrowRight, Compass, Shield, Sparkles } from "lucide-react"
+import { ArrowRight, Shield, Sparkles } from "lucide-react"
 import * as React from "react"
 
 import { Badge } from "@/components/ui/badge"
@@ -70,57 +70,6 @@ const colorPhilosophies = [
     accent: "rgba(108, 211, 145, 0.95)",
     surface: "rgba(108, 211, 145, 0.12)",
     border: "rgba(108, 211, 145, 0.3)",
-  },
-]
-
-const multiverseHighlights = [
-  {
-    name: "Dominaria",
-    tagline: "o coração histórico de Magic",
-    overview: "Berço de muitas das grandes guerras, heróis e eventos fundadores do jogo.",
-    gameplay: "Costuma traduzir identidade clássica: lendas, artefatos, história militar e magia tradicional.",
-    meaning: "Representa a memória viva de Magic: The Gathering e o ponto de referência para o restante do multiverso.",
-    accent: "rgba(214, 180, 180, 0.18)",
-  },
-  {
-    name: "Ravnica",
-    tagline: "a cidade-mundo das guildas",
-    overview: "Um plano inteiramente urbano onde dez guildas disputam poder, ideologia e influência.",
-    gameplay: "É o grande laboratório das combinações bicolores, com mecânicas focadas em identidade de facção.",
-    meaning: "Representa conflito político, especialização e a riqueza de estilos nas alianças entre cores.",
-    accent: "rgba(163, 146, 220, 0.18)",
-  },
-  {
-    name: "Innistrad",
-    tagline: "horror gótico e sobrevivência",
-    overview: "Um mundo sombrio de vampiros, espíritos, lobisomens e humanos à beira do colapso.",
-    gameplay: "Brilha com sinergias tribais, cemitério, transformação e tensão constante entre luz e trevas.",
-    meaning: "Representa o lado mais macabro e emocional de Magic, onde medo e fé caminham juntos.",
-    accent: "rgba(141, 143, 158, 0.2)",
-  },
-  {
-    name: "Theros",
-    tagline: "mitologia tornada mana",
-    overview: "Plano inspirado em épicos heroicos e deuses moldados pela crença de seus devotos.",
-    gameplay: "Costuma enfatizar encantamentos, devoção, heroísmo e criaturas com presença quase mítica.",
-    meaning: "Representa a relação entre narrativa, crença e destino dentro do multiverso.",
-    accent: "rgba(160, 182, 232, 0.18)",
-  },
-  {
-    name: "Zendikar",
-    tagline: "aventura, terreno e risco",
-    overview: "Um mundo instável onde a própria terra é viva, violenta e cheia de ruínas ancestrais.",
-    gameplay: "É conhecido por landfall, aceleração, exploração e sensação de descoberta constante.",
-    meaning: "Representa a fantasia da expedição e da natureza indomável em sua forma mais espetacular.",
-    accent: "rgba(108, 211, 145, 0.16)",
-  },
-  {
-    name: "Phyrexia",
-    tagline: "perfeição pela corrupção",
-    overview: "Uma ameaça biomecânica que converte tudo em uma visão brutal de unidade e assimilação.",
-    gameplay: "Traduz pressão opressiva com proliferação, marcadores, sacrifício e custo de vida como recurso.",
-    meaning: "Representa a distorção extrema das filosofias de Magic quando a busca por ordem vira fanatismo total.",
-    accent: "rgba(255, 119, 92, 0.14)",
   },
 ]
 
@@ -277,48 +226,6 @@ function Index() {
                         </div>
                       </article>
                     ))}
-                  </div>
-
-                  <div className="rounded-[28px] border border-border/70 bg-background/35 p-5">
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-11 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
-                        <Compass className="size-5" />
-                      </div>
-                      <div>
-                        <h2 className="text-lg font-semibold tracking-tight">Planos para começar a explorar</h2>
-                        <p className="text-sm text-muted-foreground">
-                          Alguns dos mundos mais marcantes para entender o tom, a fantasia e as mecânicas de Magic.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 grid gap-3">
-                      {multiverseHighlights.map((plane) => (
-                        <article
-                          key={plane.name}
-                          className="rounded-2xl border border-border/70 p-4"
-                          style={{
-                            background: `linear-gradient(135deg, ${plane.accent}, rgba(32, 34, 49, 0.92))`,
-                          }}
-                        >
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <h3 className="text-base font-semibold tracking-tight">{plane.name}</h3>
-                            <Badge variant="outline" className="rounded-full border-border/70 bg-background/40 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                              {plane.tagline}
-                            </Badge>
-                          </div>
-                          <div className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
-                            <p>{plane.overview}</p>
-                            <p>
-                              <span className="font-medium text-foreground">No jogo:</span> {plane.gameplay}
-                            </p>
-                            <p>
-                              <span className="font-medium text-foreground">Em Magic:</span> {plane.meaning}
-                            </p>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
                   </div>
                 </div>
               </CardContent>
