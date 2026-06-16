@@ -5,10 +5,12 @@ export type TypeList = {
 
 export type List = {
   id: string
+  user_id: string | null
   type_id: string
   name_list: string
   name_grimoire: string | null
   description: string | null
+  private: boolean
 }
 
 export type Card = {

@@ -1,37 +1,16 @@
 import * as React from "react"
 
 import { toast } from "@/components/ui/use-toast"
+import { getAuthUser } from "@/controllers/authController"
 import * as cardsController from "@/controllers/cardsController"
 import { getErrorMessage } from "@/controllers/errorController"
 import * as listsController from "@/controllers/listsController"
 import * as typeListController from "@/controllers/typeListController"
+import { MtgContext, type CreateListInput, type MtgContextValue } from "@/contexts/mtg-store"
+import * as usersService from "@/services/usersService"
 import type { Card, List, TypeList } from "@/types/mtg"
 
 type CardsByListId = Record<string, Card[] | undefined>
-
-type MtgContextValue = {
-  typeLists: TypeList[]
-  lists: List[]
-  cardsByListId: CardsByListId
-  isLoadingTypes: boolean
-  isLoadingLists: boolean
-  isLoadingCards: (listId: string) => boolean
-  error: string | null
-  refreshTypeLists: () => Promise<void>
-  refreshLists: () => Promise<void>
-  refreshCards: (listId: string) => Promise<void>
-  createTypeList: (input: Omit<TypeList, "id">) => Promise<void>
-  updateTypeList: (id: string, input: Partial<Omit<TypeList, "id">>) => Promise<void>
-  deleteTypeList: (id: string) => Promise<void>
-  createList: (input: Omit<List, "id">) => Promise<void>
-  updateList: (id: string, input: Partial<Omit<List, "id">>) => Promise<void>
-  deleteList: (id: string) => Promise<void>
-  createCard: (input: Omit<Card, "id">) => Promise<void>
-  updateCard: (id: string, input: Partial<Omit<Card, "id">>) => Promise<void>
-  deleteCard: (id: string, listId: string) => Promise<void>
-}
-
-const MtgContext = React.createContext<MtgContextValue | null>(null)
 
 export function MtgProvider({ children }: { children: React.ReactNode }) {
   const [typeLists, setTypeLists] = React.useState<TypeList[]>([])
@@ -76,8 +55,12 @@ export function MtgProvider({ children }: { children: React.ReactNode }) {
     setError(null)
     setIsLoadingLists(true)
     try {
-      const data = await listsController.listLists()
-      setLists(data ?? [])
+      const [data, proUsers] = await Promise.all([
+        listsController.listListsFiltered({ privateFlag: false }),
+        usersService.getProUsers(),
+      ])
+      const proUserIds = new Set(proUsers.map((user) => user.id))
+      setLists((data ?? []).filter((list) => Boolean(list.user_id) && proUserIds.has(list.user_id as string)))
     } catch (e) {
       notifyError("Erro ao carregar listas", e)
     } finally {
@@ -137,10 +120,18 @@ export function MtgProvider({ children }: { children: React.ReactNode }) {
     }
   }, [notifyError, notifySuccess])
 
-  const createList = React.useCallback(async (input: Omit<List, "id">) => {
+  const createList = React.useCallback(async (input: CreateListInput) => {
     setError(null)
     try {
-      const created = await listsController.createList(input)
+      const authUser = getAuthUser()
+      const created = await listsController.createList({
+        user_id: authUser?.id ?? null,
+        private: input.private ?? false,
+        type_id: input.type_id,
+        name_list: input.name_list,
+        name_grimoire: input.name_grimoire,
+        description: input.description,
+      })
       if (created) {
         setLists((s) => [...s, created].sort((a, b) => a.name_list.localeCompare(b.name_list)))
         notifySuccess("Lista criada", created.name_list)
@@ -226,8 +217,10 @@ export function MtgProvider({ children }: { children: React.ReactNode }) {
   }, [notifyError, notifySuccess])
 
   React.useEffect(() => {
-    refreshTypeLists()
-    refreshLists()
+    queueMicrotask(() => {
+      refreshTypeLists()
+      refreshLists()
+    })
   }, [refreshLists, refreshTypeLists])
 
   const value = React.useMemo<MtgContextValue>(
@@ -276,10 +269,4 @@ export function MtgProvider({ children }: { children: React.ReactNode }) {
   )
 
   return <MtgContext.Provider value={value}>{children}</MtgContext.Provider>
-}
-
-export function useMtg() {
-  const ctx = React.useContext(MtgContext)
-  if (!ctx) throw new Error("useMtg deve ser usado dentro de MtgProvider")
-  return ctx
 }

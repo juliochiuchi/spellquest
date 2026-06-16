@@ -6,6 +6,7 @@ import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogRoo
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { SelectContent, SelectItem, SelectRoot, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import type { ListFormValues } from "@/types/forms"
 import { listFormSchema } from "@/types/forms"
@@ -17,12 +18,14 @@ export function ListFormDialog({
   typeLists,
   initial,
   onSubmit,
+  allowPrivateField = false,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   typeLists: TypeList[]
   initial?: List | null
   onSubmit: (values: ListFormValues) => Promise<void> | void
+  allowPrivateField?: boolean
 }) {
   const title = initial ? "Editar lista" : "Nova lista"
   const key = `${initial?.id ?? "new"}-${open ? "1" : "0"}-${typeLists[0]?.id ?? "none"}`
@@ -38,6 +41,7 @@ export function ListFormDialog({
           key={key}
           typeLists={typeLists}
           initial={initial ?? null}
+          allowPrivateField={allowPrivateField}
           onCancel={() => onOpenChange(false)}
           onSubmit={async (values) => {
             await onSubmit(values)
@@ -54,11 +58,13 @@ function ListFormDialogBody({
   initial,
   onSubmit,
   onCancel,
+  allowPrivateField,
 }: {
   typeLists: TypeList[]
   initial: List | null
   onSubmit: (values: ListFormValues) => Promise<void>
   onCancel: () => void
+  allowPrivateField: boolean
 }) {
   const form = useForm<ListFormValues>({
     resolver: zodResolver(listFormSchema),
@@ -68,12 +74,14 @@ function ListFormDialogBody({
         name_list: initial.name_list,
         name_grimoire: initial.name_grimoire,
         description: initial.description,
+        private: initial.private,
       }
       : {
         type_id: typeLists[0]?.id ?? "",
         name_list: "",
         name_grimoire: null,
         description: null,
+        private: false,
       },
   })
 
@@ -115,6 +123,20 @@ function ListFormDialogBody({
         <Label>Descrição (opcional)</Label>
         <Textarea {...form.register("description")} placeholder="Observações, notas de compra, prioridades..." />
       </div>
+
+      {allowPrivateField ? (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/60 px-4 py-3">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="private-list">Lista privada</Label>
+            <p className="text-xs text-muted-foreground">Quando ativo, apenas você poderá visualizar essa lista na sua área privada.</p>
+          </div>
+          <Switch
+            id="private-list"
+            checked={form.watch("private")}
+            onCheckedChange={(checked) => form.setValue("private", checked, { shouldValidate: true })}
+          />
+        </div>
+      ) : null}
 
       <DialogFooter className="mt-2">
         <Button type="button" variant="outline" onClick={onCancel}>

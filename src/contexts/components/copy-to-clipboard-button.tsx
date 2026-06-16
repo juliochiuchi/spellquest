@@ -10,6 +10,7 @@ export function CopyToClipboardButton({
   size = "sm",
   variant = "outline",
   disabled,
+  className,
 }: {
   text: string
   label?: string
@@ -17,6 +18,7 @@ export function CopyToClipboardButton({
   size?: React.ComponentProps<typeof Button>["size"]
   variant?: React.ComponentProps<typeof Button>["variant"]
   disabled?: boolean
+  className?: string
 }) {
   const [copied, setCopied] = React.useState(false)
 
@@ -28,7 +30,7 @@ export function CopyToClipboardButton({
   }, [disabled, text])
 
   return (
-    <Button type="button" variant={variant} size={size} onClick={onCopy} disabled={disabled}>
+    <Button type="button" variant={variant} size={size} onClick={onCopy} disabled={disabled} className={className}>
       {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
       {showLabel ? <span>{label}</span> : <span className="sr-only">{label}</span>}
     </Button>

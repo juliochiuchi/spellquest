@@ -2,15 +2,19 @@ import * as React from "react"
 
 import { ScreenLoading } from "@/components/ui/screen-loading"
 import { Toaster } from "@/components/ui/toaster"
-import { MtgProvider, useMtg } from "@/contexts/mtg-context"
+import { AuthProvider } from "@/contexts/auth-context"
+import { MtgProvider } from "@/contexts/mtg-context"
+import { useMtg } from "@/contexts/mtg-store"
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
-    <MtgProvider>
-      {children}
-      <BootLoadingOverlay />
-      <Toaster />
-    </MtgProvider>
+    <AuthProvider>
+      <MtgProvider>
+        {children}
+        <BootLoadingOverlay />
+        <Toaster />
+      </MtgProvider>
+    </AuthProvider>
   )
 }
 

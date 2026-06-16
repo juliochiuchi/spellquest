@@ -22,10 +22,9 @@ export function PageShell({
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
           {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
         </div>
-        {actions ? <div className="flex items-center justify-start gap-2 sm:justify-end">{actions}</div> : null}
+        {actions ? <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">{actions}</div> : null}
       </div>
       {children}
     </div>
   )
 }
-

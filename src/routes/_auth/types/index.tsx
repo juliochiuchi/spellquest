@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { Pencil, Plus, Trash2 } from "lucide-react"
+import { createFileRoute, redirect } from "@tanstack/react-router"
+import { Pencil, Plus, RefreshCw, Trash2 } from "lucide-react"
 import * as React from "react"
 
 import { Button } from "@/components/ui/button"
@@ -10,11 +10,22 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { LoadingReveal } from "@/components/ui/loading-reveal"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { getAuthUser } from "@/controllers/authController"
 import { PageShell } from "@/contexts/components/page-shell"
-import { useMtg } from "@/contexts/mtg-context"
+import { useMtg } from "@/contexts/mtg-store"
 import type { TypeList } from "@/types/mtg"
 
-export const Route = createFileRoute("/_app/types/")({
+export const Route = createFileRoute("/_auth/types/")({
+  beforeLoad: () => {
+    const user = getAuthUser()
+    if (!user) {
+      throw redirect({ to: "/login" })
+    }
+
+    if (!user.pro) {
+      throw redirect({ to: "/dashboard" })
+    }
+  },
   component: TypesPage,
 })
 
@@ -28,8 +39,9 @@ function TypesPage() {
       title="Tipos de lista"
       description="Ex.: Grimório, Interesse. Eles aparecem no cadastro das listas."
       actions={
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
           <Button
+            className="w-full sm:w-auto"
             onClick={() => {
               setEditing(null)
               setOpen(true)
@@ -38,7 +50,8 @@ function TypesPage() {
             <Plus className="size-4" />
             Novo tipo
           </Button>
-          <Button variant="outline" onClick={refreshTypeLists} disabled={isLoadingTypes}>
+          <Button className="w-full sm:w-auto" variant="outline" onClick={refreshTypeLists} disabled={isLoadingTypes}>
+            <RefreshCw className="size-4" />
             Atualizar
           </Button>
         </div>
@@ -49,7 +62,46 @@ function TypesPage() {
       <LoadingReveal isLoading={isLoadingTypes} label="Carregando tipos...">
         <Card>
           <CardContent className="p-0">
-            <div className="w-full overflow-x-auto">
+            <div className="grid gap-3 p-4 md:hidden">
+              {typeLists.map((t) => (
+                <div key={t.id} className="rounded-xl border border-border/70 bg-background/60 p-4 shadow-sm shadow-black/5">
+                  <div className="text-sm font-medium">{t.name}</div>
+
+                  <div className="mt-4 flex items-center justify-end gap-2">
+                    <Button
+                      size="icon-sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditing(t)
+                        setOpen(true)
+                      }}
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                    <ConfirmDialog
+                      title="Excluir tipo?"
+                      description={`Essa ação remove o tipo "${t.name}" e não pode ser desfeita.`}
+                      confirmLabel="Excluir"
+                      destructive
+                      onConfirm={() => deleteTypeList(t.id)}
+                      trigger={
+                        <Button size="icon-sm" variant="destructive">
+                          <Trash2 className="size-4" />
+                        </Button>
+                      }
+                    />
+                  </div>
+                </div>
+              ))}
+
+              {typeLists.length === 0 && !isLoadingTypes ? (
+                <div className="rounded-xl border border-border/70 bg-background/40 px-4 py-10 text-center text-sm text-muted-foreground">
+                  Nenhum tipo cadastrado.
+                </div>
+              ) : null}
+            </div>
+
+            <div className="hidden w-full overflow-x-auto md:block">
               <Table>
                 <TableHeader>
                   <TableRow>

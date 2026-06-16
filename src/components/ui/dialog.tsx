@@ -37,7 +37,7 @@ function DialogContent({ className, ...props }: React.ComponentProps<typeof Dial
       <DialogOverlay />
       <Dialog.Content
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border/80 bg-card/96 p-6 shadow-[0_28px_90px_-40px_rgba(8,10,19,0.95)] outline-none backdrop-blur-md",
+          "fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border border-border/80 bg-card/96 p-6 shadow-[0_28px_90px_-40px_rgba(8,10,19,0.95)] outline-none backdrop-blur-md",
           className
         )}
         {...props}

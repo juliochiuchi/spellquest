@@ -1,37 +1,182 @@
 import { Link, createFileRoute } from "@tanstack/react-router"
-import { ArrowRight, Plus } from "lucide-react"
+import { ArrowRight, Compass, Shield, Sparkles } from "lucide-react"
 import * as React from "react"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingReveal } from "@/components/ui/loading-reveal"
-import { useMtg } from "@/contexts/mtg-context"
-import { ListFormDialog } from "@/contexts/components/forms/list-form-dialog"
+import * as listsController from "@/controllers/listsController"
+import { useAuth } from "@/contexts/auth-context"
+import { useMtg } from "@/contexts/mtg-store"
 import { PageShell } from "@/contexts/components/page-shell"
 
 export const Route = createFileRoute('/_app/')({
   component: Index,
 })
 
+const colorPhilosophies = [
+  {
+    name: "Branco",
+    mana: "W",
+    essence: "ordem, proteção e comunidade",
+    philosophy: "Busca equilíbrio pela lei, pela disciplina e pela cooperação entre todos.",
+    strategy: "Controla o ritmo da partida com ganho de vida, remoções eficientes, exércitos coordenados e efeitos de proteção.",
+    representation: "No lore de Magic, o branco representa civilizações, hierarquias, fé, honra e o senso de dever coletivo.",
+    accent: "rgba(246, 232, 197, 0.95)",
+    surface: "rgba(246, 232, 197, 0.12)",
+    border: "rgba(246, 232, 197, 0.3)",
+  },
+  {
+    name: "Azul",
+    mana: "U",
+    essence: "conhecimento, cálculo e transformação",
+    philosophy: "Acredita que tudo pode ser aperfeiçoado com estudo, planejamento e domínio da informação.",
+    strategy: "Joga no tempo do oponente com compra de cartas, anulações, manipulação de mão e controle do campo.",
+    representation: "No multiverso, o azul simboliza magos, inventores, ilusionistas e sociedades guiadas por intelecto e ambição mental.",
+    accent: "rgba(111, 181, 255, 0.95)",
+    surface: "rgba(111, 181, 255, 0.12)",
+    border: "rgba(111, 181, 255, 0.3)",
+  },
+  {
+    name: "Preto",
+    mana: "B",
+    essence: "ambição, poder e pragmatismo",
+    philosophy: "Aceita qualquer custo para alcançar liberdade, ascensão pessoal e controle sobre o destino.",
+    strategy: "Explora recursos extremos com descarte, sacrifício, reanimação, drenagem de vida e remoções implacáveis.",
+    representation: "Em Magic, o preto encarna necromantes, demônios, intriga, sobrevivência e a vontade de vencer acima de tudo.",
+    accent: "rgba(171, 150, 206, 0.95)",
+    surface: "rgba(171, 150, 206, 0.12)",
+    border: "rgba(171, 150, 206, 0.3)",
+  },
+  {
+    name: "Vermelho",
+    mana: "R",
+    essence: "emoção, impulso e liberdade",
+    philosophy: "Valoriza a ação imediata, a paixão e a autenticidade acima do controle excessivo.",
+    strategy: "Pressiona rápido com dano direto, criaturas agressivas, explosões de mana e jogadas imprevisíveis.",
+    representation: "No universo de Magic, o vermelho é a chama dos bárbaros, dragões, artistas, rebeldes e tempestades vulcânicas.",
+    accent: "rgba(255, 119, 92, 0.95)",
+    surface: "rgba(255, 119, 92, 0.12)",
+    border: "rgba(255, 119, 92, 0.3)",
+  },
+  {
+    name: "Verde",
+    mana: "G",
+    essence: "crescimento, instinto e interdependência",
+    philosophy: "Confia na ordem natural do mundo e na força que surge da conexão com a vida.",
+    strategy: "Acelera mana, coloca ameaças enormes em campo, fortalece criaturas e domina pelo volume e eficiência orgânica.",
+    representation: "No lore, o verde representa florestas ancestrais, feras, druidas e a aceitação do papel de cada ser no todo.",
+    accent: "rgba(108, 211, 145, 0.95)",
+    surface: "rgba(108, 211, 145, 0.12)",
+    border: "rgba(108, 211, 145, 0.3)",
+  },
+]
+
+const multiverseHighlights = [
+  {
+    name: "Dominaria",
+    tagline: "o coração histórico de Magic",
+    overview: "Berço de muitas das grandes guerras, heróis e eventos fundadores do jogo.",
+    gameplay: "Costuma traduzir identidade clássica: lendas, artefatos, história militar e magia tradicional.",
+    meaning: "Representa a memória viva de Magic: The Gathering e o ponto de referência para o restante do multiverso.",
+    accent: "rgba(214, 180, 180, 0.18)",
+  },
+  {
+    name: "Ravnica",
+    tagline: "a cidade-mundo das guildas",
+    overview: "Um plano inteiramente urbano onde dez guildas disputam poder, ideologia e influência.",
+    gameplay: "É o grande laboratório das combinações bicolores, com mecânicas focadas em identidade de facção.",
+    meaning: "Representa conflito político, especialização e a riqueza de estilos nas alianças entre cores.",
+    accent: "rgba(163, 146, 220, 0.18)",
+  },
+  {
+    name: "Innistrad",
+    tagline: "horror gótico e sobrevivência",
+    overview: "Um mundo sombrio de vampiros, espíritos, lobisomens e humanos à beira do colapso.",
+    gameplay: "Brilha com sinergias tribais, cemitério, transformação e tensão constante entre luz e trevas.",
+    meaning: "Representa o lado mais macabro e emocional de Magic, onde medo e fé caminham juntos.",
+    accent: "rgba(141, 143, 158, 0.2)",
+  },
+  {
+    name: "Theros",
+    tagline: "mitologia tornada mana",
+    overview: "Plano inspirado em épicos heroicos e deuses moldados pela crença de seus devotos.",
+    gameplay: "Costuma enfatizar encantamentos, devoção, heroísmo e criaturas com presença quase mítica.",
+    meaning: "Representa a relação entre narrativa, crença e destino dentro do multiverso.",
+    accent: "rgba(160, 182, 232, 0.18)",
+  },
+  {
+    name: "Zendikar",
+    tagline: "aventura, terreno e risco",
+    overview: "Um mundo instável onde a própria terra é viva, violenta e cheia de ruínas ancestrais.",
+    gameplay: "É conhecido por landfall, aceleração, exploração e sensação de descoberta constante.",
+    meaning: "Representa a fantasia da expedição e da natureza indomável em sua forma mais espetacular.",
+    accent: "rgba(108, 211, 145, 0.16)",
+  },
+  {
+    name: "Phyrexia",
+    tagline: "perfeição pela corrupção",
+    overview: "Uma ameaça biomecânica que converte tudo em uma visão brutal de unidade e assimilação.",
+    gameplay: "Traduz pressão opressiva com proliferação, marcadores, sacrifício e custo de vida como recurso.",
+    meaning: "Representa a distorção extrema das filosofias de Magic quando a busca por ordem vira fanatismo total.",
+    accent: "rgba(255, 119, 92, 0.14)",
+  },
+]
+
 function Index() {
-  const { lists, typeLists, isLoadingLists, isLoadingTypes, createList } = useMtg()
-  const [open, setOpen] = React.useState(false)
+  const { typeLists, isLoadingTypes } = useMtg()
+  const { user } = useAuth()
 
   const hasTypes = typeLists.length > 0
-  const totalLists = lists.length
-  const withGrimoire = lists.filter((l) => Boolean(l.name_grimoire?.trim())).length
-  const isLoading = isLoadingLists || isLoadingTypes
+  const [totalLists, setTotalLists] = React.useState<number | null>(null)
+  const [totalGrimoires, setTotalGrimoires] = React.useState<number | null>(null)
+  const [isLoadingCounts, setIsLoadingCounts] = React.useState(false)
+  const isLoading = isLoadingCounts || isLoadingTypes
+  const canManageOwnLists = Boolean(user)
+  const canManageTypes = Boolean(user?.pro)
+
+  React.useEffect(() => {
+    let cancelled = false
+
+    queueMicrotask(() => {
+      setIsLoadingCounts(true)
+      Promise.all([listsController.countLists(), listsController.countGrimoires()])
+        .then(([listsCount, grimoiresCount]) => {
+          if (cancelled) return
+          setTotalLists(listsCount)
+          setTotalGrimoires(grimoiresCount)
+        })
+        .catch(() => {
+          if (cancelled) return
+          setTotalLists(0)
+          setTotalGrimoires(0)
+        })
+        .finally(() => {
+          if (cancelled) return
+          setIsLoadingCounts(false)
+        })
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <PageShell
       title="Dashboard"
-      description="Gerencie listas de cartas que você deseja comprar e copie no formato da LigaMagic."
+      description="Consulte listas públicas criadas por usuários PRO e acesse sua área privada quando estiver logado."
       actions={
         <div className="flex items-center gap-2">
-          <Button onClick={() => setOpen(true)} disabled={!hasTypes}>
-            <Plus className="size-4" />
-            Nova lista
-          </Button>
+          {canManageOwnLists ? (
+            <Button asChild disabled={!hasTypes}>
+              <Link to="/my-lists">
+                <Shield className="size-4" />
+                Minhas listas
+              </Link>
+            </Button>
+          ) : null}
           <Button asChild variant="outline">
             <Link to="/lists">
               Ver listas
@@ -49,7 +194,7 @@ function Index() {
               <CardDescription>Total cadastradas</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-semibold tracking-tight">{totalLists}</div>
+              <div className="text-3xl font-semibold tracking-tight">{totalLists ?? "—"}</div>
             </CardContent>
           </Card>
 
@@ -59,12 +204,129 @@ function Index() {
               <CardDescription>Listas com grimório associado</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-semibold tracking-tight">{withGrimoire}</div>
+              <div className="text-3xl font-semibold tracking-tight">{totalGrimoires ?? "—"}</div>
             </CardContent>
           </Card>
         </div>
 
-        {!hasTypes ? (
+        {!canManageOwnLists ? (
+          <section className="mt-3 grid gap-4">
+            <Card className="overflow-hidden border-border/80 bg-card/80">
+              <CardHeader className="gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary" className="rounded-full border border-border/70 bg-background/60 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                    Multiversos
+                  </Badge>
+                  <Badge variant="outline" className="rounded-full border-primary/20 bg-primary/8 px-3 py-1 text-primary">
+                    Guia de identidade
+                  </Badge>
+                </div>
+                <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="space-y-2">
+                    <CardTitle className="text-xl sm:text-2xl">Entenda as cores e os mundos que moldam o multiverso</CardTitle>
+                    <CardDescription className="max-w-3xl text-sm leading-6 text-muted-foreground">
+                      Antes de montar listas ou procurar cartas, vale conhecer o que cada cor valoriza, como ela vence partidas e quais planos traduzem o tom de Magic: The Gathering.
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2 rounded-2xl border border-primary/15 bg-primary/8 px-4 py-3 text-sm text-muted-foreground">
+                    <Sparkles className="size-4 text-primary" />
+                    Um panorama rápido para novos planeswalkers.
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="grid gap-6">
+                <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-1">
+                    {colorPhilosophies.map((color) => (
+                      <article
+                        key={color.name}
+                        className="rounded-3xl border p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+                        style={{
+                          background: `linear-gradient(135deg, ${color.surface}, rgba(39, 41, 56, 0.82))`,
+                          borderColor: color.border,
+                        }}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-base font-semibold tracking-tight" style={{ color: color.accent }}>
+                              {color.name}
+                            </p>
+                            <p className="mt-1 text-sm text-muted-foreground">{color.essence}</p>
+                          </div>
+                          <span
+                            className="inline-flex min-w-10 items-center justify-center rounded-full border px-3 py-1 text-xs font-semibold tracking-[0.3em]"
+                            style={{
+                              color: color.accent,
+                              borderColor: color.border,
+                              backgroundColor: color.surface,
+                            }}
+                          >
+                            {color.mana}
+                          </span>
+                        </div>
+                        <div className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
+                          <p>
+                            <span className="font-medium text-foreground">Filosofia:</span> {color.philosophy}
+                          </p>
+                          <p>
+                            <span className="font-medium text-foreground">Estratégia:</span> {color.strategy}
+                          </p>
+                          <p>
+                            <span className="font-medium text-foreground">No universo:</span> {color.representation}
+                          </p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+
+                  <div className="rounded-[28px] border border-border/70 bg-background/35 p-5">
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-11 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+                        <Compass className="size-5" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold tracking-tight">Planos para começar a explorar</h2>
+                        <p className="text-sm text-muted-foreground">
+                          Alguns dos mundos mais marcantes para entender o tom, a fantasia e as mecânicas de Magic.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 grid gap-3">
+                      {multiverseHighlights.map((plane) => (
+                        <article
+                          key={plane.name}
+                          className="rounded-2xl border border-border/70 p-4"
+                          style={{
+                            background: `linear-gradient(135deg, ${plane.accent}, rgba(32, 34, 49, 0.92))`,
+                          }}
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <h3 className="text-base font-semibold tracking-tight">{plane.name}</h3>
+                            <Badge variant="outline" className="rounded-full border-border/70 bg-background/40 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                              {plane.tagline}
+                            </Badge>
+                          </div>
+                          <div className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
+                            <p>{plane.overview}</p>
+                            <p>
+                              <span className="font-medium text-foreground">No jogo:</span> {plane.gameplay}
+                            </p>
+                            <p>
+                              <span className="font-medium text-foreground">Em Magic:</span> {plane.meaning}
+                            </p>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        ) : null}
+
+        {!hasTypes && canManageTypes ? (
           <Card>
             <CardHeader>
               <CardTitle>Primeiro passo</CardTitle>
@@ -84,20 +346,6 @@ function Index() {
           </Card>
         ) : null}
       </LoadingReveal>
-
-      <ListFormDialog
-        open={open}
-        onOpenChange={setOpen}
-        typeLists={typeLists}
-        onSubmit={async (values) => {
-          await createList({
-            type_id: values.type_id,
-            name_list: values.name_list,
-            name_grimoire: values.name_grimoire,
-            description: values.description,
-          })
-        }}
-      />
     </PageShell>
   )
 }

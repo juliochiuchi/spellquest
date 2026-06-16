@@ -9,12 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthLayoutRouteImport } from './routes/_auth/layout'
 import { Route as AppLayoutRouteImport } from './routes/_app/layout'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
-import { Route as AppTypesIndexRouteImport } from './routes/_app/types/index'
+import { Route as AuthDashboardRouteImport } from './routes/_auth/dashboard'
+import { Route as AppLoginRouteImport } from './routes/_app/login'
+import { Route as AuthTypesIndexRouteImport } from './routes/_auth/types/index'
+import { Route as AuthPublicListsIndexRouteImport } from './routes/_auth/public-lists/index'
+import { Route as AuthMyListsIndexRouteImport } from './routes/_auth/my-lists/index'
 import { Route as AppListsIndexRouteImport } from './routes/_app/lists/index'
+import { Route as AuthPublicListsListIdRouteImport } from './routes/_auth/public-lists/$listId'
+import { Route as AuthMyListsListIdRouteImport } from './routes/_auth/my-lists/$listId'
 import { Route as AppListsListIdRouteImport } from './routes/_app/lists/$listId'
 
+const AuthLayoutRoute = AuthLayoutRouteImport.update({
+  id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppLayoutRoute = AppLayoutRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
@@ -24,15 +35,45 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppLayoutRoute,
 } as any)
-const AppTypesIndexRoute = AppTypesIndexRouteImport.update({
+const AuthDashboardRoute = AuthDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthLayoutRoute,
+} as any)
+const AppLoginRoute = AppLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AppLayoutRoute,
+} as any)
+const AuthTypesIndexRoute = AuthTypesIndexRouteImport.update({
   id: '/types/',
   path: '/types/',
-  getParentRoute: () => AppLayoutRoute,
+  getParentRoute: () => AuthLayoutRoute,
+} as any)
+const AuthPublicListsIndexRoute = AuthPublicListsIndexRouteImport.update({
+  id: '/public-lists/',
+  path: '/public-lists/',
+  getParentRoute: () => AuthLayoutRoute,
+} as any)
+const AuthMyListsIndexRoute = AuthMyListsIndexRouteImport.update({
+  id: '/my-lists/',
+  path: '/my-lists/',
+  getParentRoute: () => AuthLayoutRoute,
 } as any)
 const AppListsIndexRoute = AppListsIndexRouteImport.update({
   id: '/lists/',
   path: '/lists/',
   getParentRoute: () => AppLayoutRoute,
+} as any)
+const AuthPublicListsListIdRoute = AuthPublicListsListIdRouteImport.update({
+  id: '/public-lists/$listId',
+  path: '/public-lists/$listId',
+  getParentRoute: () => AuthLayoutRoute,
+} as any)
+const AuthMyListsListIdRoute = AuthMyListsListIdRouteImport.update({
+  id: '/my-lists/$listId',
+  path: '/my-lists/$listId',
+  getParentRoute: () => AuthLayoutRoute,
 } as any)
 const AppListsListIdRoute = AppListsListIdRouteImport.update({
   id: '/lists/$listId',
@@ -42,44 +83,98 @@ const AppListsListIdRoute = AppListsListIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/login': typeof AppLoginRoute
+  '/dashboard': typeof AuthDashboardRoute
   '/lists/$listId': typeof AppListsListIdRoute
+  '/my-lists/$listId': typeof AuthMyListsListIdRoute
+  '/public-lists/$listId': typeof AuthPublicListsListIdRoute
   '/lists/': typeof AppListsIndexRoute
-  '/types/': typeof AppTypesIndexRoute
+  '/my-lists/': typeof AuthMyListsIndexRoute
+  '/public-lists/': typeof AuthPublicListsIndexRoute
+  '/types/': typeof AuthTypesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
+  '/login': typeof AppLoginRoute
+  '/dashboard': typeof AuthDashboardRoute
   '/lists/$listId': typeof AppListsListIdRoute
+  '/my-lists/$listId': typeof AuthMyListsListIdRoute
+  '/public-lists/$listId': typeof AuthPublicListsListIdRoute
   '/lists': typeof AppListsIndexRoute
-  '/types': typeof AppTypesIndexRoute
+  '/my-lists': typeof AuthMyListsIndexRoute
+  '/public-lists': typeof AuthPublicListsIndexRoute
+  '/types': typeof AuthTypesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppLayoutRouteWithChildren
+  '/_auth': typeof AuthLayoutRouteWithChildren
+  '/_app/login': typeof AppLoginRoute
+  '/_auth/dashboard': typeof AuthDashboardRoute
   '/_app/': typeof AppIndexRoute
   '/_app/lists/$listId': typeof AppListsListIdRoute
+  '/_auth/my-lists/$listId': typeof AuthMyListsListIdRoute
+  '/_auth/public-lists/$listId': typeof AuthPublicListsListIdRoute
   '/_app/lists/': typeof AppListsIndexRoute
-  '/_app/types/': typeof AppTypesIndexRoute
+  '/_auth/my-lists/': typeof AuthMyListsIndexRoute
+  '/_auth/public-lists/': typeof AuthPublicListsIndexRoute
+  '/_auth/types/': typeof AuthTypesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/lists/$listId' | '/lists/' | '/types/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/dashboard'
+    | '/lists/$listId'
+    | '/my-lists/$listId'
+    | '/public-lists/$listId'
+    | '/lists/'
+    | '/my-lists/'
+    | '/public-lists/'
+    | '/types/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/lists/$listId' | '/lists' | '/types'
+  to:
+    | '/'
+    | '/login'
+    | '/dashboard'
+    | '/lists/$listId'
+    | '/my-lists/$listId'
+    | '/public-lists/$listId'
+    | '/lists'
+    | '/my-lists'
+    | '/public-lists'
+    | '/types'
   id:
     | '__root__'
     | '/_app'
+    | '/_auth'
+    | '/_app/login'
+    | '/_auth/dashboard'
     | '/_app/'
     | '/_app/lists/$listId'
+    | '/_auth/my-lists/$listId'
+    | '/_auth/public-lists/$listId'
     | '/_app/lists/'
-    | '/_app/types/'
+    | '/_auth/my-lists/'
+    | '/_auth/public-lists/'
+    | '/_auth/types/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppLayoutRoute: typeof AppLayoutRouteWithChildren
+  AuthLayoutRoute: typeof AuthLayoutRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthLayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -94,12 +189,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppLayoutRoute
     }
-    '/_app/types/': {
-      id: '/_app/types/'
+    '/_auth/dashboard': {
+      id: '/_auth/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthDashboardRouteImport
+      parentRoute: typeof AuthLayoutRoute
+    }
+    '/_app/login': {
+      id: '/_app/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof AppLoginRouteImport
+      parentRoute: typeof AppLayoutRoute
+    }
+    '/_auth/types/': {
+      id: '/_auth/types/'
       path: '/types'
       fullPath: '/types/'
-      preLoaderRoute: typeof AppTypesIndexRouteImport
-      parentRoute: typeof AppLayoutRoute
+      preLoaderRoute: typeof AuthTypesIndexRouteImport
+      parentRoute: typeof AuthLayoutRoute
+    }
+    '/_auth/public-lists/': {
+      id: '/_auth/public-lists/'
+      path: '/public-lists'
+      fullPath: '/public-lists/'
+      preLoaderRoute: typeof AuthPublicListsIndexRouteImport
+      parentRoute: typeof AuthLayoutRoute
+    }
+    '/_auth/my-lists/': {
+      id: '/_auth/my-lists/'
+      path: '/my-lists'
+      fullPath: '/my-lists/'
+      preLoaderRoute: typeof AuthMyListsIndexRouteImport
+      parentRoute: typeof AuthLayoutRoute
     }
     '/_app/lists/': {
       id: '/_app/lists/'
@@ -107,6 +230,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/lists/'
       preLoaderRoute: typeof AppListsIndexRouteImport
       parentRoute: typeof AppLayoutRoute
+    }
+    '/_auth/public-lists/$listId': {
+      id: '/_auth/public-lists/$listId'
+      path: '/public-lists/$listId'
+      fullPath: '/public-lists/$listId'
+      preLoaderRoute: typeof AuthPublicListsListIdRouteImport
+      parentRoute: typeof AuthLayoutRoute
+    }
+    '/_auth/my-lists/$listId': {
+      id: '/_auth/my-lists/$listId'
+      path: '/my-lists/$listId'
+      fullPath: '/my-lists/$listId'
+      preLoaderRoute: typeof AuthMyListsListIdRouteImport
+      parentRoute: typeof AuthLayoutRoute
     }
     '/_app/lists/$listId': {
       id: '/_app/lists/$listId'
@@ -119,25 +256,48 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppLayoutRouteChildren {
+  AppLoginRoute: typeof AppLoginRoute
   AppIndexRoute: typeof AppIndexRoute
   AppListsListIdRoute: typeof AppListsListIdRoute
   AppListsIndexRoute: typeof AppListsIndexRoute
-  AppTypesIndexRoute: typeof AppTypesIndexRoute
 }
 
 const AppLayoutRouteChildren: AppLayoutRouteChildren = {
+  AppLoginRoute: AppLoginRoute,
   AppIndexRoute: AppIndexRoute,
   AppListsListIdRoute: AppListsListIdRoute,
   AppListsIndexRoute: AppListsIndexRoute,
-  AppTypesIndexRoute: AppTypesIndexRoute,
 }
 
 const AppLayoutRouteWithChildren = AppLayoutRoute._addFileChildren(
   AppLayoutRouteChildren,
 )
 
+interface AuthLayoutRouteChildren {
+  AuthDashboardRoute: typeof AuthDashboardRoute
+  AuthMyListsListIdRoute: typeof AuthMyListsListIdRoute
+  AuthPublicListsListIdRoute: typeof AuthPublicListsListIdRoute
+  AuthMyListsIndexRoute: typeof AuthMyListsIndexRoute
+  AuthPublicListsIndexRoute: typeof AuthPublicListsIndexRoute
+  AuthTypesIndexRoute: typeof AuthTypesIndexRoute
+}
+
+const AuthLayoutRouteChildren: AuthLayoutRouteChildren = {
+  AuthDashboardRoute: AuthDashboardRoute,
+  AuthMyListsListIdRoute: AuthMyListsListIdRoute,
+  AuthPublicListsListIdRoute: AuthPublicListsListIdRoute,
+  AuthMyListsIndexRoute: AuthMyListsIndexRoute,
+  AuthPublicListsIndexRoute: AuthPublicListsIndexRoute,
+  AuthTypesIndexRoute: AuthTypesIndexRoute,
+}
+
+const AuthLayoutRouteWithChildren = AuthLayoutRoute._addFileChildren(
+  AuthLayoutRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AppLayoutRoute: AppLayoutRouteWithChildren,
+  AuthLayoutRoute: AuthLayoutRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

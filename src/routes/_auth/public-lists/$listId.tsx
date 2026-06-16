@@ -1,9 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { CircleDashed, CircleCheckBig, RefreshCw } from "lucide-react"
 import * as React from "react"
 
 import * as cardsController from "@/controllers/cardsController"
+import { getErrorMessage } from "@/controllers/errorController"
 import { formatCardsForLigaMagic, formatCardForLigaMagic } from "@/controllers/ligaMagicController"
+import * as listsController from "@/controllers/listsController"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card as CardUi, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,29 +19,53 @@ import { CardImageTrigger } from "@/contexts/components/card-image-trigger"
 import { CopyToClipboardButton } from "@/contexts/components/copy-to-clipboard-button"
 import { PageShell } from "@/contexts/components/page-shell"
 import { useMtg } from "@/contexts/mtg-store"
-import type { Card } from "@/types/mtg"
+import type { Card, List } from "@/types/mtg"
 
-export const Route = createFileRoute("/_app/lists/$listId")({
-  component: ListDetailPage,
+export const Route = createFileRoute("/_auth/public-lists/$listId")({
+  beforeLoad: async ({ params }) => {
+    const list = await listsController.getListById(params.listId)
+    if (!list || list.private) throw redirect({ to: "/public-lists" })
+  },
+  component: PublicListDetailPage,
 })
 
-function ListDetailPage() {
+function PublicListDetailPage() {
   const { listId } = Route.useParams()
-  const {
-    lists,
-    typeLists,
-    cardsByListId,
-    error,
-    isLoadingCards,
-    refreshCards,
-  } = useMtg()
+  const { typeLists } = useMtg()
 
-  const list = React.useMemo(() => lists.find((l) => l.id === listId) ?? null, [listId, lists])
-  const cards = React.useMemo(() => cardsByListId[listId] ?? [], [cardsByListId, listId])
+  const [list, setList] = React.useState<List | null>(null)
+  const [cards, setCards] = React.useState<Card[]>([])
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
+
+  const refresh = React.useCallback(async () => {
+    setError(null)
+    setIsLoading(true)
+    try {
+      const [nextList, nextCards] = await Promise.all([
+        listsController.getListById(listId),
+        cardsController.listCardsByListId(listId),
+      ])
+
+      if (!nextList || nextList.private) {
+        setList(null)
+        setCards([])
+        return
+      }
+
+      setList(nextList)
+      setCards(nextCards ?? [])
+    } catch (nextError) {
+      const message = getErrorMessage(nextError, "Nao foi possivel carregar a lista")
+      setError(message)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [listId])
 
   React.useEffect(() => {
-    refreshCards(listId)
-  }, [listId, refreshCards])
+    void refresh()
+  }, [refresh])
 
   const [previewCard, setPreviewCard] = React.useState<Card | null>(null)
 
@@ -66,7 +92,7 @@ function ListDetailPage() {
 
   return (
     <PageShell
-      title={list?.name_list ?? "Lista"}
+      title={list?.name_list ?? "Lista pública"}
       description={list ? `${typeName}${list.name_grimoire ? ` • Grimório: ${list.name_grimoire}` : ""}` : "—"}
       actions={
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
@@ -89,14 +115,12 @@ function ListDetailPage() {
     >
       {error ? <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm">{error}</div> : null}
 
-      <LoadingReveal isLoading={isLoadingCards(listId)} label="Carregando cartas...">
+      <LoadingReveal isLoading={isLoading} label="Carregando cartas...">
         <CardUi>
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-col gap-1">
               <CardTitle>Cartas</CardTitle>
-              <div className="text-sm text-muted-foreground">
-                {isLoadingCards(listId) ? "Carregando..." : `${cards.length} carta(s)`}
-              </div>
+              <div className="text-sm text-muted-foreground">{isLoading ? "Carregando..." : `${cards.length} carta(s)`}</div>
             </div>
 
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
@@ -118,7 +142,7 @@ function ListDetailPage() {
                   </SelectContent>
                 </SelectRoot>
               </div>
-              <Button className="w-full sm:w-auto" variant="outline" onClick={() => refreshCards(listId)} disabled={isLoadingCards(listId)}>
+              <Button className="w-full sm:w-auto" variant="outline" onClick={() => void refresh()} disabled={isLoading}>
                 <RefreshCw className="size-4" />
                 Atualizar
               </Button>
@@ -186,7 +210,7 @@ function ListDetailPage() {
                 </div>
               ))}
 
-              {visibleCards.length === 0 && !isLoadingCards(listId) ? (
+              {visibleCards.length === 0 && !isLoading ? (
                 <div className="rounded-xl border border-border/70 bg-background/40 px-4 py-10 text-center text-sm text-muted-foreground">
                   Nenhuma carta encontrada para esse filtro.
                 </div>
@@ -204,7 +228,7 @@ function ListDetailPage() {
                     <TableHead className="w-[140px]">Edição</TableHead>
                     <TableHead className="w-[120px]">Compra</TableHead>
                     <TableHead className="w-[72px] text-right">Qtd</TableHead>
-                    <TableHead className="w-[220px] text-right">Ações</TableHead>
+                    <TableHead className="w-[160px] text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -221,36 +245,35 @@ function ListDetailPage() {
                           }
                         />
                       </TableCell>
-                      <TableCell className="w-full min-w-[320px]">
+                      <TableCell className="min-w-[320px]">
                         <div className="flex items-center gap-3">
-                          <div className="min-w-0 font-medium">
-                            <div className="truncate">{c.name}</div>
+                          <div className="min-w-0">
+                            <div className="truncate font-medium">{c.name}</div>
                           </div>
-                          {c.url_image ? <CardImageTrigger name={c.name} url={c.url_image} onOpen={() => setPreviewCard(c)} /> : null}
+                          {c.url_image ? (
+                            <CardImageTrigger name={c.name} url={c.url_image} onOpen={() => setPreviewCard(c)} />
+                          ) : null}
                         </div>
                       </TableCell>
                       <TableCell>
                         <Badge variant="muted">{c.edition}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={c.is_purchased ? "secondary" : "muted"}
-                          className="gap-1.5"
-                        >
+                        <Badge variant={c.is_purchased ? "secondary" : "muted"} className="gap-1.5">
                           {c.is_purchased ? <CircleCheckBig className="size-3.5" /> : <CircleDashed className="size-3.5" />}
                           {c.is_purchased ? "Comprada" : "Pendente"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right tabular-nums">{c.quantity}</TableCell>
+                      <TableCell className="text-right">{c.quantity}</TableCell>
                       <TableCell>
-                        <div className="flex items-center justify-end gap-2">
-                          <CopyToClipboardButton text={formatCardForLigaMagic(c)} label="Copiar carta" />
+                        <div className="flex items-center justify-end">
+                          <CopyToClipboardButton text={formatCardForLigaMagic(c)} label="Copiar" />
                         </div>
                       </TableCell>
                     </TableRow>
                   ))}
 
-                  {visibleCards.length === 0 && !isLoadingCards(listId) ? (
+                  {visibleCards.length === 0 && !isLoading ? (
                     <TableRow>
                       <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
                         Nenhuma carta encontrada para esse filtro.
@@ -264,24 +287,18 @@ function ListDetailPage() {
         </CardUi>
       </LoadingReveal>
 
-      <DialogRoot open={Boolean(previewCard)} onOpenChange={(next) => {
-        if (!next) setPreviewCard(null)
-      }}>
-        <DialogContent className="max-w-sm p-4">
-          {previewCard ? (
-            <>
-              <DialogHeader>
-                <DialogTitle>{previewCard.name}</DialogTitle>
-              </DialogHeader>
-              <div className="mt-4 overflow-hidden rounded-xl border border-border/70 bg-background/60">
-                <img
-                  src={previewCard.url_image ?? ""}
-                  alt={previewCard.name}
-                  className="h-auto w-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-            </>
+      <DialogRoot
+        open={Boolean(previewCard)}
+        onOpenChange={(openValue) => {
+          if (!openValue) setPreviewCard(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{previewCard?.name ?? "Carta"}</DialogTitle>
+          </DialogHeader>
+          {previewCard?.url_image ? (
+            <img src={previewCard.url_image} alt={previewCard.name} className="w-full rounded-xl border border-border/70" />
           ) : null}
         </DialogContent>
       </DialogRoot>
