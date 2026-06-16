@@ -4,7 +4,7 @@ import * as React from "react"
 
 import { toast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getErrorMessage } from "@/controllers/errorController"
 import * as listsController from "@/controllers/listsController"
 import { ListFormDialog } from "@/contexts/components/forms/list-form-dialog"
@@ -56,7 +56,9 @@ function MyListsPage() {
   }, [user])
 
   React.useEffect(() => {
-    void refreshMyLists()
+    queueMicrotask(() => {
+      void refreshMyLists()
+    })
   }, [refreshMyLists])
 
   return (
