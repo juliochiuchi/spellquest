@@ -173,109 +173,107 @@ function Index() {
           </Card>
         </div>
 
-        {!canManageOwnLists ? (
-          <section className="mt-3 grid gap-4">
-            <Card className="overflow-hidden border-border/80 bg-card/80">
-              <CardHeader className="gap-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary" className="rounded-full border border-border/70 bg-background/60 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                    Multiversos
-                  </Badge>
-                  <Badge variant="outline" className="rounded-full border-primary/20 bg-primary/8 px-3 py-1 text-primary">
-                    Guia de identidade
-                  </Badge>
+        <section className="mt-3 grid gap-4">
+          <Card className="overflow-hidden border-border/80 bg-card/80">
+            <CardHeader className="gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="secondary" className="rounded-full border border-border/70 bg-background/60 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                  Multiversos
+                </Badge>
+                <Badge variant="outline" className="rounded-full border-primary/20 bg-primary/8 px-3 py-1 text-primary">
+                  Guia de identidade
+                </Badge>
+              </div>
+              <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                <div className="space-y-2">
+                  <CardTitle className="text-xl sm:text-2xl">Entenda as cores e os mundos que moldam o multiverso</CardTitle>
+                  <CardDescription className="max-w-3xl text-sm leading-6 text-muted-foreground">
+                    Antes de montar listas ou procurar cartas, vale conhecer o que cada cor valoriza, como ela vence partidas e quais planos traduzem o tom de Magic: The Gathering.
+                  </CardDescription>
                 </div>
-                <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
-                  <div className="space-y-2">
-                    <CardTitle className="text-xl sm:text-2xl">Entenda as cores e os mundos que moldam o multiverso</CardTitle>
-                    <CardDescription className="max-w-3xl text-sm leading-6 text-muted-foreground">
-                      Antes de montar listas ou procurar cartas, vale conhecer o que cada cor valoriza, como ela vence partidas e quais planos traduzem o tom de Magic: The Gathering.
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center gap-2 rounded-2xl border border-primary/15 bg-primary/8 px-4 py-3 text-sm text-muted-foreground">
-                    <Sparkles className="size-4 text-primary" />
-                    Um panorama rápido para novos planeswalkers.
-                  </div>
+                <div className="flex items-center gap-2 rounded-2xl border border-primary/15 bg-primary/8 px-4 py-3 text-sm text-muted-foreground">
+                  <Sparkles className="size-4 text-primary" />
+                  Um panorama rápido para novos planeswalkers.
                 </div>
-              </CardHeader>
-              <CardContent className="grid gap-6">
-                <div className="grid gap-4">
-                  {colorPhilosophies.map((color) => (
+              </div>
+            </CardHeader>
+            <CardContent className="grid gap-6">
+              <div className="grid gap-4">
+                {colorPhilosophies.map((color) => (
+                  <div
+                    key={color.name}
+                    className="group flex flex-col items-center justify-center gap-4 rounded-3xl sm:flex-row sm:items-stretch sm:justify-center"
+                  >
                     <div
-                      key={color.name}
-                      className="group flex flex-col items-center justify-center gap-4 rounded-3xl sm:flex-row sm:items-stretch sm:justify-center"
+                      className="relative flex w-full max-w-[320px] shrink-0 flex-col items-center justify-center overflow-hidden rounded-3xl border px-6 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] sm:w-[220px] sm:self-stretch"
+                      style={{
+                        borderColor: color.border,
+                        background: `radial-gradient(circle_at_30%_30%, ${color.surface}, rgba(12, 13, 18, 0.92))`,
+                        color: color.accent,
+                      }}
                     >
-                      <div
-                        className="relative flex w-full max-w-[320px] shrink-0 flex-col items-center justify-center overflow-hidden rounded-3xl border px-6 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] sm:w-[220px] sm:self-stretch"
-                        style={{
-                          borderColor: color.border,
-                          background: `radial-gradient(circle_at_30%_30%, ${color.surface}, rgba(12, 13, 18, 0.92))`,
-                          color: color.accent,
-                        }}
-                      >
-                        <div className="relative w-full flex-1 aspect-63/88 overflow-hidden shadow-[0_20px_60px_-40px_rgba(0,0,0,0.9)] sm:aspect-auto">
-                          <img
-                            src={color.imageUrl}
-                            alt={`Arte de ${color.terrain}`}
-                            loading="lazy"
-                            decoding="async"
-                            className="absolute inset-0 h-full w-full object-contain"
-                          />
+                      <div className="relative w-full flex-1 aspect-63/88 overflow-hidden shadow-[0_20px_60px_-40px_rgba(0,0,0,0.9)] sm:aspect-auto">
+                        <img
+                          src={color.imageUrl}
+                          alt={`Arte de ${color.terrain}`}
+                          loading="lazy"
+                          decoding="async"
+                          className="absolute inset-0 h-full w-full object-contain"
+                        />
+                      </div>
+                    </div>
+
+                    <article
+                      className="w-full flex-1 rounded-3xl border p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:self-stretch"
+                      style={{
+                        background: `linear-gradient(135deg, rgba(39, 41, 56, 0.72), rgba(39, 41, 56, 0.92))`,
+                        borderColor: "rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="text-base font-semibold tracking-tight" style={{ color: color.accent }}>
+                            {color.name}
+                          </p>
+                          <p className="mt-1 text-sm text-muted-foreground">{color.essence}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-[0.24em] text-muted-foreground"
+                            style={{ borderColor: color.border, backgroundColor: "rgba(0,0,0,0.18)" }}
+                          >
+                            {color.terrain}
+                          </span>
+                          <span
+                            className="inline-flex min-w-10 items-center justify-center rounded-full border px-3 py-1 text-xs font-semibold tracking-[0.3em]"
+                            style={{
+                              color: color.accent,
+                              borderColor: color.border,
+                              backgroundColor: color.surface,
+                            }}
+                          >
+                            {color.mana}
+                          </span>
                         </div>
                       </div>
-
-                      <article
-                        className="w-full flex-1 rounded-3xl border p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:self-stretch"
-                        style={{
-                          background: `linear-gradient(135deg, rgba(39, 41, 56, 0.72), rgba(39, 41, 56, 0.92))`,
-                          borderColor: "rgba(255,255,255,0.08)",
-                        }}
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <p className="text-base font-semibold tracking-tight" style={{ color: color.accent }}>
-                              {color.name}
-                            </p>
-                            <p className="mt-1 text-sm text-muted-foreground">{color.essence}</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-[0.24em] text-muted-foreground"
-                              style={{ borderColor: color.border, backgroundColor: "rgba(0,0,0,0.18)" }}
-                            >
-                              {color.terrain}
-                            </span>
-                            <span
-                              className="inline-flex min-w-10 items-center justify-center rounded-full border px-3 py-1 text-xs font-semibold tracking-[0.3em]"
-                              style={{
-                                color: color.accent,
-                                borderColor: color.border,
-                                backgroundColor: color.surface,
-                              }}
-                            >
-                              {color.mana}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
-                          <p>
-                            <span className="font-medium text-foreground">Filosofia:</span> {color.philosophy}
-                          </p>
-                          <p>
-                            <span className="font-medium text-foreground">Estratégia:</span> {color.strategy}
-                          </p>
-                          <p>
-                            <span className="font-medium text-foreground">No universo:</span> {color.representation}
-                          </p>
-                        </div>
-                      </article>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-        ) : null}
+                      <div className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
+                        <p>
+                          <span className="font-medium text-foreground">Filosofia:</span> {color.philosophy}
+                        </p>
+                        <p>
+                          <span className="font-medium text-foreground">Estratégia:</span> {color.strategy}
+                        </p>
+                        <p>
+                          <span className="font-medium text-foreground">No universo:</span> {color.representation}
+                        </p>
+                      </div>
+                    </article>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
         {!hasTypes && canManageTypes ? (
           <Card>
