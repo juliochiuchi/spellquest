@@ -1,5 +1,6 @@
 import { Link, Outlet, createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
-import { Layers, LayoutDashboard, LogOut, ScrollText, Shield } from "lucide-react"
+import { LayoutDashboard, LogOut, Menu, ScrollText, Shield, X } from "lucide-react"
+import * as React from "react"
 
 import mtgLogo from "@/assets/mtg-logo.png"
 import { getAuthUser } from "@/controllers/authController"
@@ -29,13 +30,15 @@ function AuthLayout() {
 function AuthLayoutContent() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
-  const showTypes = Boolean(user?.pro)
+  // const showTypes = Boolean(user?.pro)
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
+  const mobileMenuId = React.useId()
 
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/72 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex w-full items-center gap-3 sm:w-auto">
             <div className="flex size-10 items-center justify-center rounded-2xl border border-border/80 bg-card/90 shadow-lg shadow-black/20">
               <img src={mtgLogo} alt="SpellQuest" className="size-6 object-contain" />
             </div>
@@ -43,10 +46,30 @@ function AuthLayoutContent() {
               <span className="text-sm font-semibold tracking-tight">Área logada</span>
               <span className="text-xs text-muted-foreground">{user ? `${user.nickname}${user.pro ? " • PRO" : ""}` : "—"}</span>
             </div>
+
+            <Button
+              type="button"
+              size="icon-sm"
+              variant="outline"
+              className="ml-auto rounded-xl sm:hidden"
+              aria-controls={mobileMenuId}
+              aria-expanded={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen((open) => !open)}
+            >
+              {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
+              <span className="sr-only">{mobileMenuOpen ? "Fechar menu" : "Abrir menu"}</span>
+            </Button>
           </div>
 
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
-            <nav className="grid w-full grid-cols-4 gap-2 sm:flex sm:w-auto sm:items-center sm:gap-1">
+          <div
+            id={mobileMenuId}
+            className={cn(
+              "flex w-full flex-col gap-2 rounded-2xl border border-border/70 bg-card/50 p-2 shadow-sm shadow-black/10 sm:w-auto sm:flex-row sm:items-center sm:gap-3 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none",
+              mobileMenuOpen ? "flex" : "hidden sm:flex"
+            )}
+            onClickCapture={() => setMobileMenuOpen(false)}
+          >
+            <nav className="flex w-full flex-col gap-1 sm:flex sm:w-auto sm:flex-row sm:items-center sm:gap-1">
               <NavItem to="/dashboard" icon={<LayoutDashboard className="size-4" />}>
                 Dashboard
               </NavItem>
@@ -56,11 +79,11 @@ function AuthLayoutContent() {
               <NavItem to="/public-lists" icon={<ScrollText className="size-4" />}>
                 Públicas
               </NavItem>
-              {showTypes ? (
+              {/* {showTypes ? (
                 <NavItem to="/types" icon={<Layers className="size-4" />}>
                   Tipos
                 </NavItem>
-              ) : null}
+              ) : null} */}
             </nav>
 
             <Button
@@ -95,7 +118,7 @@ function NavItem({
   children: React.ReactNode
 }) {
   const baseClassName =
-    "flex w-full items-center justify-center gap-2 rounded-xl border border-transparent px-3.5 py-2 text-sm text-muted-foreground transition-colors hover:border-border/70 hover:bg-card/70 hover:text-foreground sm:w-auto sm:justify-start"
+    "flex w-full items-center justify-start gap-2 rounded-xl border border-transparent px-3.5 py-2 text-sm text-muted-foreground transition-colors hover:border-border/70 hover:bg-card/70 hover:text-foreground sm:w-auto"
 
   return (
     <Link

@@ -135,6 +135,7 @@ function MyListsPage() {
         privateFlag={privateFlag}
         currentUserId={user?.id ?? null}
         detailTo="/my-lists/$listId"
+        showMobileOpenAction
         onEdit={(list) => {
           if (!canCreateList) return
           setEditing(list)

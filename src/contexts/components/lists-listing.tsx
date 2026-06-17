@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { Pencil, Trash2 } from "lucide-react"
+import { ArrowRight, Pencil, Trash2 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -19,6 +19,7 @@ export function ListsListing({
   currentUserId,
   detailMode = "public",
   detailTo = "/lists/$listId",
+  showMobileOpenAction = false,
   showOwnerActions = true,
   onEdit,
   onDelete,
@@ -32,6 +33,7 @@ export function ListsListing({
   currentUserId?: string | null
   detailMode?: "public" | "none"
   detailTo?: "/lists/$listId" | "/my-lists/$listId" | "/public-lists/$listId"
+  showMobileOpenAction?: boolean
   showOwnerActions?: boolean
   onEdit: (list: List) => void
   onDelete: (id: string) => void | Promise<void>
@@ -72,7 +74,44 @@ export function ListsListing({
                     <p className="text-sm text-muted-foreground">{l.description ?? "Sem descrição."}</p>
                   </div>
 
-                  {showOwnerActions && l.user_id && currentUserId && l.user_id === currentUserId ? (
+                  {showMobileOpenAction && detailMode === "public" ? (
+                    <div className="mt-4 flex items-center justify-end gap-2">
+                      <Button asChild size="icon-sm" variant="outline">
+                        <Link to={detailTo} params={{ listId: l.id }}>
+                          <ArrowRight className="size-4" />
+                          <span className="sr-only">Abrir lista</span>
+                        </Link>
+                      </Button>
+
+                      {showOwnerActions && l.user_id && currentUserId && l.user_id === currentUserId ? (
+                        <>
+                          <Button
+                            size="icon-sm"
+                            variant="outline"
+                            onClick={() => {
+                              onEdit(l)
+                            }}
+                          >
+                            <Pencil className="size-4" />
+                            <span className="sr-only">Editar lista</span>
+                          </Button>
+                          <ConfirmDialog
+                            title="Excluir lista?"
+                            description={`Essa ação remove a lista "${l.name_list}" e não pode ser desfeita.`}
+                            confirmLabel="Excluir"
+                            destructive
+                            onConfirm={() => onDelete(l.id)}
+                            trigger={
+                              <Button size="icon-sm" variant="destructive">
+                                <Trash2 className="size-4" />
+                                <span className="sr-only">Excluir lista</span>
+                              </Button>
+                            }
+                          />
+                        </>
+                      ) : null}
+                    </div>
+                  ) : showOwnerActions && l.user_id && currentUserId && l.user_id === currentUserId ? (
                     <div className="mt-4 flex items-center justify-end gap-2">
                       <Button
                         size="icon-sm"
@@ -82,6 +121,7 @@ export function ListsListing({
                         }}
                       >
                         <Pencil className="size-4" />
+                        <span className="sr-only">Editar lista</span>
                       </Button>
                       <ConfirmDialog
                         title="Excluir lista?"
@@ -92,6 +132,7 @@ export function ListsListing({
                         trigger={
                           <Button size="icon-sm" variant="destructive">
                             <Trash2 className="size-4" />
+                            <span className="sr-only">Excluir lista</span>
                           </Button>
                         }
                       />

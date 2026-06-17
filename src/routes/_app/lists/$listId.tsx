@@ -273,7 +273,7 @@ function ListDetailPage() {
               <DialogHeader>
                 <DialogTitle>{previewCard.name}</DialogTitle>
               </DialogHeader>
-              <div className="mt-4 overflow-hidden rounded-xl border border-border/70 bg-background/60">
+              <div className="mt-6 overflow-hidden rounded-xl border border-border/70 bg-background/60">
                 <img
                   src={previewCard.url_image ?? ""}
                   alt={previewCard.name}

@@ -492,7 +492,9 @@ function PrivateListDetailPage() {
             <DialogTitle>{previewCard?.name ?? "Carta"}</DialogTitle>
           </DialogHeader>
           {previewCard?.url_image ? (
-            <img src={previewCard.url_image} alt={previewCard.name} className="w-full rounded-xl border border-border/70" />
+            <div className="mt-6 overflow-hidden rounded-xl border border-border/70 bg-background/60">
+              <img src={previewCard.url_image} alt={previewCard.name} className="w-full" />
+            </div>
           ) : null}
         </DialogContent>
       </DialogRoot>

@@ -45,6 +45,7 @@ function ListsPage() {
         typeNameById={typeNameById}
         privateFlag={false}
         currentUserId={user?.id ?? null}
+        showMobileOpenAction
         showOwnerActions={Boolean(user?.pro)}
         onEdit={(list) => {
           if (!user?.pro) {
