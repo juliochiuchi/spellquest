@@ -44,9 +44,13 @@ function AppLayoutContent() {
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/72 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex w-full items-center gap-3 sm:w-auto">
-            <div className="flex size-10 items-center justify-center rounded-2xl border border-border/80 bg-card/90 shadow-lg shadow-black/20">
+            <Link
+              to="/"
+              aria-label="Ir para a dashboard publica"
+              className="flex size-10 items-center justify-center rounded-2xl border border-border/80 bg-card/90 shadow-lg shadow-black/20 transition-colors hover:border-primary/40"
+            >
               <img src={mtgLogo} alt="SpellQuest" className="size-6 object-contain" />
-            </div>
+            </Link>
             <div className="flex flex-col leading-tight">
               <span className="text-sm font-semibold tracking-tight">SpellQuest</span>
               <span className="hidden text-xs text-muted-foreground sm:inline">Listas de compra de Magic: The Gathering</span>
