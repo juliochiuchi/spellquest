@@ -19,6 +19,7 @@ const colorPhilosophies = [
   {
     name: "Branco",
     mana: "W",
+    terrain: "Planície",
     essence: "ordem, proteção e comunidade",
     philosophy: "Busca equilíbrio pela lei, pela disciplina e pela cooperação entre todos.",
     strategy: "Controla o ritmo da partida com ganho de vida, remoções eficientes, exércitos coordenados e efeitos de proteção.",
@@ -26,10 +27,13 @@ const colorPhilosophies = [
     accent: "rgba(246, 232, 197, 0.95)",
     surface: "rgba(246, 232, 197, 0.12)",
     border: "rgba(246, 232, 197, 0.3)",
+    imageUrl:
+      "https://repositorio.sbrauble.com/arquivos/in/magic/120197/69e0038966a7c-5ba7i-dr9qw-02319e0b18e8daa0134d91a5a521b051.jpg",
   },
   {
     name: "Azul",
     mana: "U",
+    terrain: "Ilha",
     essence: "conhecimento, cálculo e transformação",
     philosophy: "Acredita que tudo pode ser aperfeiçoado com estudo, planejamento e domínio da informação.",
     strategy: "Joga no tempo do oponente com compra de cartas, anulações, manipulação de mão e controle do campo.",
@@ -37,10 +41,13 @@ const colorPhilosophies = [
     accent: "rgba(111, 181, 255, 0.95)",
     surface: "rgba(111, 181, 255, 0.12)",
     border: "rgba(111, 181, 255, 0.3)",
+    imageUrl:
+      "https://repositorio.sbrauble.com/arquivos/in/magic/480722/680c2bb71c6c3-tyjg6-s3agq-342ae777dd7918ef3adb03315447c65d.jpg",
   },
   {
     name: "Preto",
     mana: "B",
+    terrain: "Pântano",
     essence: "ambição, poder e pragmatismo",
     philosophy: "Aceita qualquer custo para alcançar liberdade, ascensão pessoal e controle sobre o destino.",
     strategy: "Explora recursos extremos com descarte, sacrifício, reanimação, drenagem de vida e remoções implacáveis.",
@@ -48,10 +55,13 @@ const colorPhilosophies = [
     accent: "rgba(171, 150, 206, 0.95)",
     surface: "rgba(171, 150, 206, 0.12)",
     border: "rgba(171, 150, 206, 0.3)",
+    imageUrl:
+      "https://repositorio.sbrauble.com/arquivos/in/magic/480197/64136f04b0ffe-sdvt0-izpbr-133900361464136f04b1040.jpg",
   },
   {
     name: "Vermelho",
     mana: "R",
+    terrain: "Montanha",
     essence: "emoção, impulso e liberdade",
     philosophy: "Valoriza a ação imediata, a paixão e a autenticidade acima do controle excessivo.",
     strategy: "Pressiona rápido com dano direto, criaturas agressivas, explosões de mana e jogadas imprevisíveis.",
@@ -59,10 +69,13 @@ const colorPhilosophies = [
     accent: "rgba(255, 119, 92, 0.95)",
     surface: "rgba(255, 119, 92, 0.12)",
     border: "rgba(255, 119, 92, 0.3)",
+    imageUrl:
+      "https://repositorio.sbrauble.com/arquivos/in/magic/480933/69cea7a24ae0c-b371j-k61v0-a15acc587a78ceec248d261d66bfbcfc.jpg",
   },
   {
     name: "Verde",
     mana: "G",
+    terrain: "Floresta",
     essence: "crescimento, instinto e interdependência",
     philosophy: "Confia na ordem natural do mundo e na força que surge da conexão com a vida.",
     strategy: "Acelera mana, coloca ameaças enormes em campo, fortalece criaturas e domina pelo volume e eficiência orgânica.",
@@ -70,8 +83,10 @@ const colorPhilosophies = [
     accent: "rgba(108, 211, 145, 0.95)",
     surface: "rgba(108, 211, 145, 0.12)",
     border: "rgba(108, 211, 145, 0.3)",
+    imageUrl:
+      "https://repositorio.sbrauble.com/arquivos/in/magic/480158/63d4433c9741c-vzko1-gmv0w-95502487963d4433c9745b.jpg",
   },
-]
+] as const
 
 function Index() {
   const { typeLists, isLoadingTypes } = useMtg()
@@ -184,34 +199,63 @@ function Index() {
                 </div>
               </CardHeader>
               <CardContent className="grid gap-6">
-                <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-1">
-                    {colorPhilosophies.map((color) => (
-                      <article
-                        key={color.name}
-                        className="rounded-3xl border p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+                <div className="grid gap-4">
+                  {colorPhilosophies.map((color) => (
+                    <div
+                      key={color.name}
+                      className="group flex flex-col items-center justify-center gap-4 rounded-3xl sm:flex-row sm:items-stretch sm:justify-center"
+                    >
+                      <div
+                        className="relative flex w-full max-w-[320px] shrink-0 flex-col items-center justify-center overflow-hidden rounded-3xl border px-6 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] sm:w-[220px] sm:self-stretch"
                         style={{
-                          background: `linear-gradient(135deg, ${color.surface}, rgba(39, 41, 56, 0.82))`,
                           borderColor: color.border,
+                          background: `radial-gradient(circle_at_30%_30%, ${color.surface}, rgba(12, 13, 18, 0.92))`,
+                          color: color.accent,
                         }}
                       >
-                        <div className="flex items-start justify-between gap-3">
+                        <div className="relative w-full flex-1 aspect-63/88 overflow-hidden shadow-[0_20px_60px_-40px_rgba(0,0,0,0.9)] sm:aspect-auto">
+                          <img
+                            src={color.imageUrl}
+                            alt={`Arte de ${color.terrain}`}
+                            loading="lazy"
+                            decoding="async"
+                            className="absolute inset-0 h-full w-full object-contain"
+                          />
+                        </div>
+                      </div>
+
+                      <article
+                        className="w-full flex-1 rounded-3xl border p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:self-stretch"
+                        style={{
+                          background: `linear-gradient(135deg, rgba(39, 41, 56, 0.72), rgba(39, 41, 56, 0.92))`,
+                          borderColor: "rgba(255,255,255,0.08)",
+                        }}
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
                             <p className="text-base font-semibold tracking-tight" style={{ color: color.accent }}>
                               {color.name}
                             </p>
                             <p className="mt-1 text-sm text-muted-foreground">{color.essence}</p>
                           </div>
-                          <span
-                            className="inline-flex min-w-10 items-center justify-center rounded-full border px-3 py-1 text-xs font-semibold tracking-[0.3em]"
-                            style={{
-                              color: color.accent,
-                              borderColor: color.border,
-                              backgroundColor: color.surface,
-                            }}
-                          >
-                            {color.mana}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-[0.24em] text-muted-foreground"
+                              style={{ borderColor: color.border, backgroundColor: "rgba(0,0,0,0.18)" }}
+                            >
+                              {color.terrain}
+                            </span>
+                            <span
+                              className="inline-flex min-w-10 items-center justify-center rounded-full border px-3 py-1 text-xs font-semibold tracking-[0.3em]"
+                              style={{
+                                color: color.accent,
+                                borderColor: color.border,
+                                backgroundColor: color.surface,
+                              }}
+                            >
+                              {color.mana}
+                            </span>
+                          </div>
                         </div>
                         <div className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
                           <p>
@@ -225,8 +269,8 @@ function Index() {
                           </p>
                         </div>
                       </article>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
