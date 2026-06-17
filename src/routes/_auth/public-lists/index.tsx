@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { RefreshCw } from "lucide-react"
+import { Loader2, RefreshCw } from "lucide-react"
 import * as React from "react"
 
 import { Button } from "@/components/ui/button"
@@ -29,8 +29,8 @@ function PublicListsPage() {
       actions={
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
           <Button className="w-full sm:w-auto" variant="outline" onClick={refreshLists} disabled={isLoadingLists}>
-            <RefreshCw className="size-4" />
-            Atualizar
+            {isLoadingLists ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+            {isLoadingLists ? "Atualizando..." : "Atualizar"}
           </Button>
         </div>
       }

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Plus, RefreshCw, Shield, Sparkles } from "lucide-react"
+import { Loader2, Plus, RefreshCw, Shield, Sparkles } from "lucide-react"
 import * as React from "react"
 
 import { toast } from "@/components/ui/use-toast"
@@ -81,8 +81,8 @@ function MyListsPage() {
             </Button>
           ) : null}
           <Button className="w-full sm:w-auto" variant="outline" onClick={() => void refreshMyLists()} disabled={isLoading}>
-            <RefreshCw className="size-4" />
-            Atualizar
+            {isLoading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+            {isLoading ? "Atualizando..." : "Atualizar"}
           </Button>
         </div>
       }

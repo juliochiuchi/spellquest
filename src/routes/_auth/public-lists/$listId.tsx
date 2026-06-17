@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { CircleDashed, CircleCheckBig, RefreshCw } from "lucide-react"
+import { CircleDashed, CircleCheckBig, Loader2, RefreshCw } from "lucide-react"
 import * as React from "react"
 
 import * as cardsController from "@/controllers/cardsController"
@@ -64,7 +64,9 @@ function PublicListDetailPage() {
   }, [listId])
 
   React.useEffect(() => {
-    void refresh()
+    queueMicrotask(() => {
+      void refresh()
+    })
   }, [refresh])
 
   const [previewCard, setPreviewCard] = React.useState<Card | null>(null)
@@ -143,8 +145,8 @@ function PublicListDetailPage() {
                 </SelectRoot>
               </div>
               <Button className="w-full sm:w-auto" variant="outline" onClick={() => void refresh()} disabled={isLoading}>
-                <RefreshCw className="size-4" />
-                Atualizar
+                {isLoading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+                {isLoading ? "Atualizando..." : "Atualizar"}
               </Button>
             </div>
 

@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { Pencil, Plus, RefreshCw, Trash2 } from "lucide-react"
+import { Loader2, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react"
 import * as React from "react"
 
 import { Button } from "@/components/ui/button"
@@ -51,8 +51,8 @@ function TypesPage() {
             Novo tipo
           </Button>
           <Button className="w-full sm:w-auto" variant="outline" onClick={refreshTypeLists} disabled={isLoadingTypes}>
-            <RefreshCw className="size-4" />
-            Atualizar
+            {isLoadingTypes ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+            {isLoadingTypes ? "Atualizando..." : "Atualizar"}
           </Button>
         </div>
       }
@@ -183,6 +183,8 @@ function TypeFormDialog({
   initial: TypeList | null
   onSubmit: (values: Omit<TypeList, "id">) => Promise<void> | void
 }) {
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
+
   return (
     <DialogRoot open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -195,20 +197,32 @@ function TypeFormDialog({
             e.preventDefault()
             const data = new FormData(e.currentTarget)
             const name = String(data.get("name") ?? "").trim()
-            await onSubmit({ name })
-            onOpenChange(false)
+            try {
+              setIsSubmitting(true)
+              await onSubmit({ name })
+              onOpenChange(false)
+            } finally {
+              setIsSubmitting(false)
+            }
           }}
         >
           <div className="flex flex-col gap-2">
             <Label>Nome</Label>
-            <Input name="name" defaultValue={initial?.name ?? ""} placeholder="Ex.: Grimório" />
+            <Input name="name" defaultValue={initial?.name ?? ""} placeholder="Ex.: Grimório" disabled={isSubmitting} />
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               Cancelar
             </Button>
-            <Button type="submit">
-              Salvar
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar"
+              )}
             </Button>
           </DialogFooter>
         </form>

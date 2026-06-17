@@ -1,5 +1,6 @@
 import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Loader2 } from "lucide-react"
 import { type Resolver, useForm, useWatch } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
@@ -83,6 +84,7 @@ function CardFormDialogBody({
   const submit = form.handleSubmit(async (values) => {
     await onSubmit(values)
   })
+  const isSubmitting = form.formState.isSubmitting
 
   const datalistId = React.useId()
   const isPurchased = useWatch({ control: form.control, name: "is_purchased" }) ?? false
@@ -91,13 +93,13 @@ function CardFormDialogBody({
     <form className="mt-4 flex flex-col gap-4" onSubmit={submit}>
       <div className="flex flex-col gap-2">
         <Label>Nome</Label>
-        <Input {...form.register("name")} placeholder="Ex.: Sol Ring" />
+        <Input {...form.register("name")} placeholder="Ex.: Sol Ring" disabled={isSubmitting} />
         {form.formState.errors.name ? <p className="text-xs text-destructive">{form.formState.errors.name.message}</p> : null}
       </div>
 
       <div className="flex flex-col gap-2">
         <Label>Edição</Label>
-        <Input list={datalistId} {...form.register("edition")} placeholder="Ex.: Commander Masters" />
+        <Input list={datalistId} {...form.register("edition")} placeholder="Ex.: Commander Masters" disabled={isSubmitting} />
         <datalist id={datalistId}>
           {editionSuggestions.map((e) => (
             <option key={e} value={e} />
@@ -108,7 +110,7 @@ function CardFormDialogBody({
 
       <div className="flex flex-col gap-2">
         <Label>Quantidade</Label>
-        <Input type="number" min={1} step={1} inputMode="numeric" {...form.register("quantity")} />
+        <Input type="number" min={1} step={1} inputMode="numeric" {...form.register("quantity")} disabled={isSubmitting} />
         {form.formState.errors.quantity ? <p className="text-xs text-destructive">{form.formState.errors.quantity.message}</p> : null}
       </div>
 
@@ -121,19 +123,29 @@ function CardFormDialogBody({
           id="is_purchased"
           checked={isPurchased}
           onCheckedChange={(checked) => form.setValue("is_purchased", Boolean(checked), { shouldDirty: true })}
+          disabled={isSubmitting}
         />
       </div>
 
       <div className="flex flex-col gap-2">
         <Label>URL da imagem (opcional)</Label>
-        <Textarea {...form.register("url_image")} placeholder="Cole a URL da imagem da carta" />
+        <Textarea {...form.register("url_image")} placeholder="Cole a URL da imagem da carta" disabled={isSubmitting} />
       </div>
 
       <DialogFooter className="mt-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
           Cancelar
         </Button>
-        <Button type="submit">Salvar</Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            "Salvar"
+          )}
+        </Button>
       </DialogFooter>
     </form>
   )

@@ -27,6 +27,7 @@ export const Route = createFileRoute('/_app/login')({
 
 function LoginPage() {
   const [mode, setMode] = React.useState<"login" | "register">("login")
+  const [isBusy, setIsBusy] = React.useState(false)
 
   return (
     <PageShell
@@ -54,10 +55,10 @@ function LoginPage() {
                 Informe seus dados para <span className="font-medium text-foreground">login</span>.
               </CardDescription>
             </div>
-            <AuthModeSwitch mode={mode} onModeChange={setMode} />
+            <AuthModeSwitch mode={mode} onModeChange={setMode} disabled={isBusy} />
           </CardHeader>
           <CardContent>
-            {mode === "login" ? <LoginForm /> : <RegisterForm />}
+            {mode === "login" ? <LoginForm isBusy={isBusy} onBusyChange={setIsBusy} /> : <RegisterForm isBusy={isBusy} onBusyChange={setIsBusy} />}
           </CardContent>
         </Card>
 
@@ -91,9 +92,11 @@ function LoginPage() {
 function AuthModeSwitch({
   mode,
   onModeChange,
+  disabled = false,
 }: {
   mode: "login" | "register"
   onModeChange: (mode: "login" | "register") => void
+  disabled?: boolean
 }) {
   return (
     <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border/80 bg-background/60 p-1">
@@ -103,6 +106,7 @@ function AuthModeSwitch({
         variant={mode === "login" ? "default" : "ghost"}
         className="rounded-xl"
         onClick={() => onModeChange("login")}
+        disabled={disabled}
       >
         <UserRound className="size-4" />
         Entrar
@@ -113,6 +117,7 @@ function AuthModeSwitch({
         variant={mode === "register" ? "default" : "ghost"}
         className="rounded-xl"
         onClick={() => onModeChange("register")}
+        disabled={disabled}
       >
         <UserPlus className="size-4" />
         Criar conta
@@ -121,7 +126,7 @@ function AuthModeSwitch({
   )
 }
 
-function LoginForm() {
+function LoginForm({ isBusy, onBusyChange }: { isBusy: boolean; onBusyChange: (busy: boolean) => void }) {
   const navigate = useNavigate()
   const { login } = useAuth()
   const [submitError, setSubmitError] = React.useState<string | null>(null)
@@ -138,6 +143,7 @@ function LoginForm() {
     setSubmitError(null)
 
     try {
+      onBusyChange(true)
       const user = await login(values)
       toast({
         title: "Login realizado",
@@ -153,8 +159,12 @@ function LoginForm() {
         description: message,
         variant: "destructive",
       })
+    } finally {
+      onBusyChange(false)
     }
   })
+
+  const isSubmitting = form.formState.isSubmitting || isBusy
 
   return (
     <form className="flex flex-col gap-4" onSubmit={submit}>
@@ -166,6 +176,7 @@ function LoginForm() {
           autoComplete="username"
           placeholder="você@email.com ou nickname"
           {...form.register("identifier")}
+          disabled={isSubmitting}
         />
         {form.formState.errors.identifier ? <ErrorText message={form.formState.errors.identifier.message} /> : null}
       </div>
@@ -179,21 +190,22 @@ function LoginForm() {
           autoComplete="current-password"
           placeholder="Sua senha"
           {...form.register("password")}
+          disabled={isSubmitting}
         />
         {form.formState.errors.password ? <ErrorText message={form.formState.errors.password.message} /> : null}
       </div>
 
       {submitError ? <FormAlert message={submitError} /> : null}
 
-      <Button type="submit" className="mt-2" disabled={form.formState.isSubmitting}>
-        {form.formState.isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : <LockKeyhole className="size-4" />}
-        Acessar dashboard
+      <Button type="submit" className="mt-2" disabled={isSubmitting}>
+        {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : <LockKeyhole className="size-4" />}
+        {isSubmitting ? "Entrando..." : "Acessar dashboard"}
       </Button>
     </form>
   )
 }
 
-function RegisterForm() {
+function RegisterForm({ isBusy, onBusyChange }: { isBusy: boolean; onBusyChange: (busy: boolean) => void }) {
   const navigate = useNavigate()
   const { register } = useAuth()
   const [submitError, setSubmitError] = React.useState<string | null>(null)
@@ -213,6 +225,7 @@ function RegisterForm() {
     setSubmitError(null)
 
     try {
+      onBusyChange(true)
       const user = await register(values)
       toast({
         title: "Conta criada",
@@ -228,8 +241,12 @@ function RegisterForm() {
         description: message,
         variant: "destructive",
       })
+    } finally {
+      onBusyChange(false)
     }
   })
+
+  const isSubmitting = form.formState.isSubmitting || isBusy
 
   return (
     <form className="flex flex-col gap-4" onSubmit={submit}>
@@ -241,6 +258,7 @@ function RegisterForm() {
             autoComplete="name"
             placeholder="Seu nome"
             {...form.register("name")}
+            disabled={isSubmitting}
           />
         </FieldBlock>
 
@@ -251,6 +269,7 @@ function RegisterForm() {
             autoComplete="nickname"
             placeholder="Seu nickname"
             {...form.register("nickname")}
+            disabled={isSubmitting}
           />
         </FieldBlock>
       </div>
@@ -263,6 +282,7 @@ function RegisterForm() {
           autoComplete="email"
           placeholder="você@email.com"
           {...form.register("email")}
+          disabled={isSubmitting}
         />
       </FieldBlock>
 
@@ -275,6 +295,7 @@ function RegisterForm() {
             autoComplete="new-password"
             placeholder="Crie uma senha"
             {...form.register("password")}
+            disabled={isSubmitting}
           />
         </FieldBlock>
 
@@ -286,15 +307,16 @@ function RegisterForm() {
             autoComplete="new-password"
             placeholder="Repita a senha"
             {...form.register("confirmPassword")}
+            disabled={isSubmitting}
           />
         </FieldBlock>
       </div>
 
       {submitError ? <FormAlert message={submitError} /> : null}
 
-      <Button type="submit" className="mt-2" disabled={form.formState.isSubmitting}>
-        {form.formState.isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
-        Criar conta e entrar
+      <Button type="submit" className="mt-2" disabled={isSubmitting}>
+        {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
+        {isSubmitting ? "Criando..." : "Criar conta e entrar"}
       </Button>
     </form>
   )

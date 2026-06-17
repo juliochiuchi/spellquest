@@ -1,4 +1,5 @@
 import * as React from "react"
+import { Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -60,11 +61,17 @@ export function ConfirmDialog({
               }
             }}
           >
-            {confirmLabel}
+            {isPending ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Processando...
+              </>
+            ) : (
+              confirmLabel
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
     </DialogRoot>
   )
 }
-

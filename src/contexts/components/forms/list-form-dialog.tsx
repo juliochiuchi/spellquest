@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
@@ -88,13 +89,18 @@ function ListFormDialogBody({
   const submit = form.handleSubmit(async (values) => {
     await onSubmit(values)
   })
+  const isSubmitting = form.formState.isSubmitting
 
   return (
     <form className="mt-4 flex flex-col gap-4" onSubmit={submit}>
       <div className="flex flex-col gap-2">
         <Label>Tipo</Label>
-        <SelectRoot value={form.watch("type_id")} onValueChange={(v) => form.setValue("type_id", v, { shouldValidate: true })}>
-          <SelectTrigger>
+        <SelectRoot
+          value={form.watch("type_id")}
+          onValueChange={(v) => form.setValue("type_id", v, { shouldValidate: true })}
+          disabled={isSubmitting}
+        >
+          <SelectTrigger disabled={isSubmitting}>
             <SelectValue placeholder="Selecione um tipo" />
           </SelectTrigger>
           <SelectContent>
@@ -110,18 +116,18 @@ function ListFormDialogBody({
 
       <div className="flex flex-col gap-2">
         <Label>Nome da lista</Label>
-        <Input {...form.register("name_list")} placeholder="Ex.: Cartas para comprar" />
+        <Input {...form.register("name_list")} placeholder="Ex.: Cartas para comprar" disabled={isSubmitting} />
         {form.formState.errors.name_list ? <p className="text-xs text-destructive">{form.formState.errors.name_list.message}</p> : null}
       </div>
 
       <div className="flex flex-col gap-2">
         <Label>Nome do grimório (opcional)</Label>
-        <Input {...form.register("name_grimoire")} placeholder="Ex.: Dimir Control" />
+        <Input {...form.register("name_grimoire")} placeholder="Ex.: Dimir Control" disabled={isSubmitting} />
       </div>
 
       <div className="flex flex-col gap-2">
         <Label>Descrição (opcional)</Label>
-        <Textarea {...form.register("description")} placeholder="Observações, notas de compra, prioridades..." />
+        <Textarea {...form.register("description")} placeholder="Observações, notas de compra, prioridades..." disabled={isSubmitting} />
       </div>
 
       {allowPrivateField ? (
@@ -134,15 +140,25 @@ function ListFormDialogBody({
             id="private-list"
             checked={form.watch("private")}
             onCheckedChange={(checked) => form.setValue("private", checked, { shouldValidate: true })}
+            disabled={isSubmitting}
           />
         </div>
       ) : null}
 
       <DialogFooter className="mt-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
           Cancelar
         </Button>
-        <Button type="submit">Salvar</Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            "Salvar"
+          )}
+        </Button>
       </DialogFooter>
     </form>
   )

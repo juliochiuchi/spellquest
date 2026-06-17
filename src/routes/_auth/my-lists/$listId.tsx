@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { CheckCheck, CircleDashed, CircleCheckBig, Pencil, Plus, RefreshCw, RotateCcw, Trash2 } from "lucide-react"
+import { CheckCheck, CircleDashed, CircleCheckBig, Loader2, Pencil, Plus, RefreshCw, RotateCcw, Trash2 } from "lucide-react"
 import * as React from "react"
 
 import * as cardsController from "@/controllers/cardsController"
@@ -75,7 +75,7 @@ function PrivateListDetailPage() {
       setIsLoadingList(false)
       setIsLoadingCards(false)
     }
-  }, [listId, user?.id])
+  }, [listId, user])
 
   const refreshCards = React.useCallback(async () => {
     setError(null)
@@ -92,12 +92,15 @@ function PrivateListDetailPage() {
   }, [listId])
 
   React.useEffect(() => {
-    void refresh()
+    queueMicrotask(() => {
+      void refresh()
+    })
   }, [refresh])
 
   const [open, setOpen] = React.useState(false)
   const [editing, setEditing] = React.useState<Card | null>(null)
   const [previewCard, setPreviewCard] = React.useState<Card | null>(null)
+  const [pendingCardActionId, setPendingCardActionId] = React.useState<string | null>(null)
 
   const [editionFilter, setEditionFilter] = React.useState<string>("__all__")
   const [search, setSearch] = React.useState("")
@@ -188,8 +191,8 @@ function PrivateListDetailPage() {
                 </SelectRoot>
               </div>
               <Button className="w-full sm:w-auto" variant="outline" onClick={() => void refreshCards()} disabled={isLoadingCards}>
-                <RefreshCw className="size-4" />
-                Atualizar
+                {isLoadingCards ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+                {isLoadingCards ? "Atualizando..." : "Atualizar"}
               </Button>
             </div>
 
@@ -257,23 +260,34 @@ function PrivateListDetailPage() {
                           size="sm"
                           variant={c.is_purchased ? "secondary" : "outline"}
                           className="flex-1 sm:flex-none"
+                          disabled={pendingCardActionId === c.id}
                           onClick={async () => {
                             try {
+                              setPendingCardActionId(c.id)
                               const updated = await cardsController.updateCard(c.id, { is_purchased: !c.is_purchased })
                               if (!updated) return
                               setCards((current) => current.map((item) => (item.id === c.id ? updated : item)))
                             } catch (nextError) {
                               const message = getErrorMessage(nextError, "Nao foi possivel atualizar a carta")
                               toast({ title: "Erro ao atualizar carta", description: message, variant: "destructive" })
+                            } finally {
+                              setPendingCardActionId((current) => (current === c.id ? null : current))
                             }
                           }}
                         >
-                          {c.is_purchased ? <RotateCcw className="size-4" /> : <CheckCheck className="size-4" />}
-                          {c.is_purchased ? "Pendente" : "Comprada"}
+                          {pendingCardActionId === c.id ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : c.is_purchased ? (
+                            <RotateCcw className="size-4" />
+                          ) : (
+                            <CheckCheck className="size-4" />
+                          )}
+                          {pendingCardActionId === c.id ? "Salvando..." : c.is_purchased ? "Pendente" : "Comprada"}
                         </Button>
                         <Button
                           size="icon-sm"
                           variant="outline"
+                          disabled={pendingCardActionId === c.id}
                           onClick={() => {
                             setEditing(c)
                             setOpen(true)
@@ -371,22 +385,33 @@ function PrivateListDetailPage() {
                               <Button
                                 size="icon-sm"
                                 variant={c.is_purchased ? "secondary" : "outline"}
+                                disabled={pendingCardActionId === c.id}
                                 onClick={async () => {
                                   try {
+                                    setPendingCardActionId(c.id)
                                     const updated = await cardsController.updateCard(c.id, { is_purchased: !c.is_purchased })
                                     if (!updated) return
                                     setCards((current) => current.map((item) => (item.id === c.id ? updated : item)))
                                   } catch (nextError) {
                                     const message = getErrorMessage(nextError, "Nao foi possivel atualizar a carta")
                                     toast({ title: "Erro ao atualizar carta", description: message, variant: "destructive" })
+                                  } finally {
+                                    setPendingCardActionId((current) => (current === c.id ? null : current))
                                   }
                                 }}
                               >
-                                {c.is_purchased ? <RotateCcw className="size-4" /> : <CheckCheck className="size-4" />}
+                                {pendingCardActionId === c.id ? (
+                                  <Loader2 className="size-4 animate-spin" />
+                                ) : c.is_purchased ? (
+                                  <RotateCcw className="size-4" />
+                                ) : (
+                                  <CheckCheck className="size-4" />
+                                )}
                               </Button>
                               <Button
                                 size="icon-sm"
                                 variant="outline"
+                                disabled={pendingCardActionId === c.id}
                                 onClick={() => {
                                   setEditing(c)
                                   setOpen(true)
