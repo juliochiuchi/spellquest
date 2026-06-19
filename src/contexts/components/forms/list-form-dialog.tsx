@@ -139,7 +139,7 @@ function ListFormDialogBody({
         <MultiSelect
           options={LIST_COLOR_OPTIONS}
           value={form.watch("colors")}
-          onValueChange={(colors) => form.setValue("colors", colors, { shouldValidate: true })}
+          onValueChange={(colors) => form.setValue("colors", colors as Array<"branco" | "azul" | "preto" | "verde" | "vermelho">, { shouldValidate: true })}
           placeholder="Selecione uma ou mais cores"
           disabled={isSubmitting}
         />
