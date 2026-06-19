@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { CheckCheck, CircleDashed, CircleCheckBig, Loader2, Pencil, Plus, RefreshCw, RotateCcw, Trash2 } from "lucide-react"
+import { ArrowRightLeft, CheckCheck, CircleDashed, CircleCheckBig, Loader2, Pencil, Plus, RefreshCw, RotateCcw, Trash2 } from "lucide-react"
 import * as React from "react"
 
 import * as cardsController from "@/controllers/cardsController"
@@ -11,8 +11,9 @@ import { Button } from "@/components/ui/button"
 import { Card as CardUi, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
-import { DialogContent, DialogHeader, DialogRoot, DialogTitle } from "@/components/ui/dialog"
+import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogRoot, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { LoadingReveal } from "@/components/ui/loading-reveal"
 import { SelectContent, SelectItem, SelectRoot, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -97,16 +98,51 @@ function PrivateListDetailPage() {
     })
   }, [refresh])
 
+  React.useEffect(() => {
+    if (!user?.id) {
+      setUserLists([])
+      return
+    }
+
+    let active = true
+    setIsLoadingUserLists(true)
+
+    void listsController
+      .listListsFiltered({ userId: user.id })
+      .then((nextLists) => {
+        if (!active) return
+        setUserLists(nextLists ?? [])
+      })
+      .catch((nextError) => {
+        if (!active) return
+        const message = getErrorMessage(nextError, "Nao foi possivel carregar as listas para transferencia")
+        toast({ title: "Erro ao carregar listas", description: message, variant: "destructive" })
+      })
+      .finally(() => {
+        if (!active) return
+        setIsLoadingUserLists(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [user?.id])
+
   const [open, setOpen] = React.useState(false)
   const [editing, setEditing] = React.useState<Card | null>(null)
   const [previewCard, setPreviewCard] = React.useState<Card | null>(null)
+  const [transferCard, setTransferCard] = React.useState<Card | null>(null)
+  const [transferTargetListId, setTransferTargetListId] = React.useState("")
   const [pendingCardActionId, setPendingCardActionId] = React.useState<string | null>(null)
+  const [userLists, setUserLists] = React.useState<List[]>([])
+  const [isLoadingUserLists, setIsLoadingUserLists] = React.useState(false)
 
   const [editionFilter, setEditionFilter] = React.useState<string>("__all__")
   const [search, setSearch] = React.useState("")
 
   const typeName = React.useMemo(() => typeLists.find((t) => t.id === list?.type_id)?.name ?? "—", [list, typeLists])
   const editions = React.useMemo(() => cardsController.getDistinctEditions(cards), [cards])
+  const transferableLists = React.useMemo(() => userLists.filter((item) => item.id !== listId), [listId, userLists])
 
   const visibleCards = React.useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -124,6 +160,19 @@ function PrivateListDetailPage() {
   const selectedCards = visibleCards.filter((c) => selectedIds[c.id])
 
   const canManageCards = Boolean(user?.id && list?.user_id && user.id === list.user_id)
+
+  const openTransferDialog = React.useCallback(
+    (card: Card) => {
+      setTransferCard(card)
+      setTransferTargetListId(transferableLists[0]?.id ?? "")
+    },
+    [transferableLists]
+  )
+
+  const closeTransferDialog = React.useCallback(() => {
+    setTransferCard(null)
+    setTransferTargetListId("")
+  }, [])
 
   return (
     <PageShell
@@ -295,6 +344,15 @@ function PrivateListDetailPage() {
                         >
                           <Pencil className="size-4" />
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={pendingCardActionId === c.id || isLoadingUserLists}
+                          onClick={() => openTransferDialog(c)}
+                        >
+                          <ArrowRightLeft className="size-4" />
+                          Transferir
+                        </Button>
                         <ConfirmDialog
                           title="Excluir carta?"
                           description={`Essa ação remove "${c.name}" da lista e não pode ser desfeita.`}
@@ -340,7 +398,7 @@ function PrivateListDetailPage() {
                     <TableHead className="w-[140px]">Edição</TableHead>
                     <TableHead className="w-[120px]">Compra</TableHead>
                     <TableHead className="w-[72px] text-right">Qtd</TableHead>
-                    <TableHead className="w-[220px] text-right">Ações</TableHead>
+                    <TableHead className="w-[320px] text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -418,6 +476,15 @@ function PrivateListDetailPage() {
                                 }}
                               >
                                 <Pencil className="size-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={pendingCardActionId === c.id || isLoadingUserLists}
+                                onClick={() => openTransferDialog(c)}
+                              >
+                                <ArrowRightLeft className="size-4" />
+                                Transferir
                               </Button>
                               <ConfirmDialog
                                 title="Excluir carta?"
@@ -521,6 +588,115 @@ function PrivateListDetailPage() {
               <img src={previewCard.url_image} alt={previewCard.name} className="w-full" />
             </div>
           ) : null}
+        </DialogContent>
+      </DialogRoot>
+
+      <DialogRoot
+        open={Boolean(transferCard)}
+        onOpenChange={(openValue) => {
+          if (!openValue) closeTransferDialog()
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Transferir carta</DialogTitle>
+            <DialogDescription>
+              Atualize a lista da carta para movê-la de "{list?.name_list ?? "Lista atual"}" para outra lista sua.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form
+            className="mt-4 flex flex-col gap-4"
+            onSubmit={async (event) => {
+              event.preventDefault()
+
+              if (!transferCard || !transferTargetListId) return
+
+              const cardToTransfer = transferCard
+              const nextListId = transferTargetListId
+              const nextList = userLists.find((item) => item.id === nextListId)
+
+              try {
+                setPendingCardActionId(cardToTransfer.id)
+                const updated = await cardsController.updateCard(cardToTransfer.id, { list_id: nextListId })
+                if (!updated) return
+
+                setCards((current) => current.filter((item) => item.id !== cardToTransfer.id))
+                setSelectedIdsByListId((state) => {
+                  const currentListSelections = state[listId]
+                  if (!currentListSelections?.[cardToTransfer.id]) return state
+
+                  const nextSelections = { ...currentListSelections }
+                  delete nextSelections[cardToTransfer.id]
+
+                  return { ...state, [listId]: nextSelections }
+                })
+
+                closeTransferDialog()
+                toast({
+                  title: "Carta transferida",
+                  description: nextList ? `"${cardToTransfer.name}" foi enviada para "${nextList.name_list}".` : undefined,
+                  variant: "success",
+                })
+              } catch (nextError) {
+                const message = getErrorMessage(nextError, "Nao foi possivel transferir a carta")
+                toast({ title: "Erro ao transferir carta", description: message, variant: "destructive" })
+              } finally {
+                setPendingCardActionId((current) => (current === cardToTransfer.id ? null : current))
+              }
+            }}
+          >
+            <div className="flex flex-col gap-2">
+              <Label>De</Label>
+              <SelectRoot value={list?.id ?? ""}>
+                <SelectTrigger disabled>
+                  <SelectValue placeholder="Lista atual" />
+                </SelectTrigger>
+                <SelectContent>
+                  {list ? <SelectItem value={list.id}>{list.name_list}</SelectItem> : null}
+                </SelectContent>
+              </SelectRoot>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label>Para</Label>
+              <SelectRoot value={transferTargetListId} onValueChange={setTransferTargetListId}>
+                <SelectTrigger disabled={isLoadingUserLists || transferableLists.length === 0}>
+                  <SelectValue
+                    placeholder={
+                      isLoadingUserLists ? "Carregando listas..." : transferableLists.length === 0 ? "Nenhuma lista disponivel" : "Selecione a lista"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {transferableLists.map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      {item.name_list}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </SelectRoot>
+              {transferableLists.length === 0 && !isLoadingUserLists ? (
+                <p className="text-xs text-muted-foreground">Crie outra lista para transferir esta carta.</p>
+              ) : null}
+            </div>
+
+            <DialogFooter className="mt-2">
+              <Button type="button" variant="outline" onClick={closeTransferDialog} disabled={pendingCardActionId === transferCard?.id}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={!transferTargetListId || pendingCardActionId === transferCard?.id}>
+                {pendingCardActionId === transferCard?.id ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    Transferindo...
+                  </>
+                ) : (
+                  "Transferir"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </DialogRoot>
     </PageShell>
