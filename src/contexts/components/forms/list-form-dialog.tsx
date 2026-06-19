@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button"
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogRoot, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { MultiSelect } from "@/components/ui/multi-select"
 import { SelectContent, SelectItem, SelectRoot, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { LIST_COLOR_OPTIONS } from "@/constants/list-colors"
 import type { ListFormValues } from "@/types/forms"
 import { listFormSchema } from "@/types/forms"
 import type { List, TypeList } from "@/types/mtg"
@@ -75,6 +77,7 @@ function ListFormDialogBody({
         name_list: initial.name_list,
         name_grimoire: initial.name_grimoire,
         description: initial.description,
+        colors: initial.colors,
         private: initial.private,
       }
       : {
@@ -82,6 +85,7 @@ function ListFormDialogBody({
         name_list: "",
         name_grimoire: null,
         description: null,
+        colors: [],
         private: false,
       },
   })
@@ -128,6 +132,18 @@ function ListFormDialogBody({
       <div className="flex flex-col gap-2">
         <Label>Descrição (opcional)</Label>
         <Textarea {...form.register("description")} placeholder="Observações, notas de compra, prioridades..." disabled={isSubmitting} />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label>Cores da lista</Label>
+        <MultiSelect
+          options={LIST_COLOR_OPTIONS}
+          value={form.watch("colors")}
+          onValueChange={(colors) => form.setValue("colors", colors, { shouldValidate: true })}
+          placeholder="Selecione uma ou mais cores"
+          disabled={isSubmitting}
+        />
+        {form.formState.errors.colors ? <p className="text-xs text-destructive">{form.formState.errors.colors.message}</p> : null}
       </div>
 
       {allowPrivateField ? (

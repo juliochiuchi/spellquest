@@ -184,6 +184,7 @@ function MyListsPage() {
                 name_list: values.name_list,
                 name_grimoire: values.name_grimoire,
                 description: values.description,
+                colors: values.colors,
                 private: values.private,
               })
 
@@ -204,6 +205,7 @@ function MyListsPage() {
               name_list: values.name_list,
               name_grimoire: values.name_grimoire,
               description: values.description,
+              colors: values.colors,
               private: values.private,
             })
 

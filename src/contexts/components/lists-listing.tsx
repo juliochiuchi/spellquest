@@ -1,12 +1,15 @@
 import { Link } from "@tanstack/react-router"
-import { ArrowRight, Pencil, Trash2 } from "lucide-react"
+import { ArrowRight, Pencil, Plus, Trash2 } from "lucide-react"
+import { Popover } from "radix-ui"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import { HoverCardContent, HoverCardRoot, HoverCardTrigger } from "@/components/ui/hover-card"
 import { LoadingReveal } from "@/components/ui/loading-reveal"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { LIST_COLOR_LABELS } from "@/constants/list-colors"
 import type { List } from "@/types/mtg"
 
 export function ListsListing({
@@ -70,6 +73,9 @@ export function ListsListing({
                       <Badge variant="muted">{typeNameById.get(l.type_id) ?? "—"}</Badge>
                       {l.name_grimoire ? <Badge variant="muted">{l.name_grimoire}</Badge> : null}
                       {l.private ? <Badge variant="secondary">Privada</Badge> : <Badge variant="muted">Publica</Badge>}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <ListColors colors={l.colors} compact />
                     </div>
                     <p className="text-sm text-muted-foreground">{l.description ?? "Sem descrição."}</p>
                   </div>
@@ -155,8 +161,9 @@ export function ListsListing({
                     <TableHead>Lista</TableHead>
                     <TableHead>Tipo</TableHead>
                     <TableHead>Grimório</TableHead>
+                    <TableHead className="w-[170px]">Cores</TableHead>
                     <TableHead>Visibilidade</TableHead>
-                    <TableHead>Descrição</TableHead>
+                    <TableHead className="w-[220px]">Descrição</TableHead>
                     <TableHead className="w-[140px] text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -177,9 +184,14 @@ export function ListsListing({
                       </TableCell>
                       <TableCell>{l.name_grimoire ?? "—"}</TableCell>
                       <TableCell>
+                        <ListColors colors={l.colors} />
+                      </TableCell>
+                      <TableCell>
                         {l.private ? <Badge variant="secondary">Privada</Badge> : <Badge variant="muted">Publica</Badge>}
                       </TableCell>
-                      <TableCell className="max-w-[440px] truncate text-muted-foreground">{l.description ?? "—"}</TableCell>
+                      <TableCell>
+                        <ListDescription description={l.description} />
+                      </TableCell>
                       <TableCell>
                         {showOwnerActions && l.user_id && currentUserId && l.user_id === currentUserId ? (
                           <div className="flex items-center justify-end gap-2">
@@ -214,7 +226,7 @@ export function ListsListing({
 
                   {visibleLists.length === 0 && !isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+                      <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
                         Nenhuma lista encontrada.
                       </TableCell>
                     </TableRow>
@@ -226,5 +238,80 @@ export function ListsListing({
         </Card>
       </LoadingReveal>
     </>
+  )
+}
+
+function ListColors({ colors, compact = false }: { colors: List["colors"], compact?: boolean }) {
+  if (colors.length === 0) {
+    return <span className={compact ? "text-xs text-muted-foreground" : "text-sm text-muted-foreground"}>{compact ? "Sem cores definidas." : "—"}</span>
+  }
+
+  const visibleColors = colors.slice(0, 2)
+  const hiddenColors = colors.slice(2)
+
+  return (
+    <div className={compact ? "flex flex-wrap items-center gap-2" : "flex flex-nowrap items-center gap-2"}>
+      {visibleColors.map((color) => (
+        <Badge key={color} variant="outline" className={!compact ? "shrink-0" : undefined}>
+          {LIST_COLOR_LABELS[color]}
+        </Badge>
+      ))}
+
+      {hiddenColors.length > 0 ? (
+        <Popover.Root>
+          <Popover.Trigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-xs"
+              className="shrink-0 rounded-md"
+              aria-label={`Exibir mais ${hiddenColors.length} cor(es)`}
+            >
+              <Plus className="size-3" />
+            </Button>
+          </Popover.Trigger>
+          <Popover.Portal>
+            <Popover.Content
+              align="start"
+              sideOffset={6}
+              className="z-50 max-w-56 rounded-xl border bg-popover p-3 text-popover-foreground shadow-md outline-none"
+            >
+              <div className="flex flex-wrap gap-2">
+                {hiddenColors.map((color) => (
+                  <Badge key={color} variant="outline">
+                    {LIST_COLOR_LABELS[color]}
+                  </Badge>
+                ))}
+              </div>
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
+      ) : null}
+    </div>
+  )
+}
+
+function ListDescription({ description }: { description: string | null }) {
+  if (!description) {
+    return <span className="text-muted-foreground">—</span>
+  }
+
+  const shouldPreview = description.length > 52
+
+  if (!shouldPreview) {
+    return <span className="block max-w-[220px] truncate text-muted-foreground">{description}</span>
+  }
+
+  return (
+    <HoverCardRoot openDelay={150} closeDelay={100}>
+      <HoverCardTrigger asChild>
+        <span className="block max-w-[220px] cursor-help truncate text-muted-foreground">
+          {description}
+        </span>
+      </HoverCardTrigger>
+      <HoverCardContent align="start" className="w-[320px]">
+        <p className="text-sm leading-6 text-foreground">{description}</p>
+      </HoverCardContent>
+    </HoverCardRoot>
   )
 }

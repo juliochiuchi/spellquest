@@ -1,3 +1,5 @@
+import type { ListColor } from "@/constants/list-colors"
+
 export type TypeList = {
   id: string
   name: string
@@ -10,6 +12,7 @@ export type List = {
   name_list: string
   name_grimoire: string | null
   description: string | null
+  colors: ListColor[]
   private: boolean
 }
 

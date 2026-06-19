@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { LIST_COLOR_VALUES } from "@/constants/list-colors"
+
 const fieldLimitMessage = "Use no maximo 30 caracteres"
 
 export const listFormSchema = z.object({
@@ -15,6 +17,7 @@ export const listFormSchema = z.object({
     .trim()
     .transform((v) => (v === "" ? null : v))
     .nullable(),
+  colors: z.array(z.enum(LIST_COLOR_VALUES)).min(1, "Selecione ao menos uma cor"),
   private: z.boolean(),
 })
 

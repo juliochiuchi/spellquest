@@ -131,6 +131,7 @@ export function MtgProvider({ children }: { children: React.ReactNode }) {
         name_list: input.name_list,
         name_grimoire: input.name_grimoire,
         description: input.description,
+        colors: input.colors,
       })
       if (created) {
         setLists((s) => [...s, created].sort((a, b) => a.name_list.localeCompare(b.name_list)))
